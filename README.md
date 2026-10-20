@@ -17,19 +17,19 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
  
 ## Dead lines
 
- - Init le projet et le mettre sur github\
- - Avoir une fenetre avec une grenouille qui sait se deplacer dans les 4 directions\
- - Cree le systeme de voiture qui avance d'un cote a l'autre de l'ecran\
- - Cree un system de colision entre la grenouille et les voiture ( a generaliser avec tout les element du decors )\
- - Avoir le system de rondins de bois qui deplace la grenouille\
- - Cree un UI pour afficher le score et cree les menu de debut et fin de partie\
- - Cree un system de save pour les meilleur score\
+ - Init le projet et le mettre sur github
+ - Avoir une fenetre avec une grenouille qui sait se deplacer dans les 4 directions
+ - Cree le systeme de voiture qui avance d'un cote a l'autre de l'ecran
+ - Cree un system de colision entre la grenouille et les voiture ( a generaliser avec tout les element du decors )
+ - Avoir le system de rondins de bois qui deplace la grenouille
+ - Cree un UI pour afficher le score et cree les menu de debut et fin de partie
+ - Cree un system de save pour les meilleur score
  - Cree une boucle de jeu complete avec un system de time et les 5 grenouille ( condition de reussite ou de perte )
 
 
 ## TODO
 
-- [ ] Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README\
-- [ ] Mettre au propre les `Dead lines`\
-- [ ] Se repartir les tache et se syncro avec github\
+- [ ] Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README
+- [ ] Mettre au propre les `Dead lines`
+- [ ] Se repartir les tache et se syncro avec github
 - [ ] Lancer le projet et ecrire les premiere lignes de code
