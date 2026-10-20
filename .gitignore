@@ -13,5 +13,8 @@ wheels/
 .vscode/
 .settings.json
 
+# Asprite
+/aseprite
+
 # Ajout eventuel de Ju
 # ...
