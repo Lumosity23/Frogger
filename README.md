@@ -29,7 +29,7 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
 
 ## TODO
 
- [] - Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README
- [] - Mettre au propre les `Dead lines`
- [] - Se repartir les tache et se syncro avec github
- [] - Lancer le projet et ecrire les premiere lignes de code
+- [ ] Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README\
+- [ ] Mettre au propre les `Dead lines`\
+- [ ] Se repartir les tache et se syncro avec github\
+- [ ] Lancer le projet et ecrire les premiere lignes de code
