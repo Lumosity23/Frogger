@@ -4,7 +4,7 @@ class Frogger:
 
     def run(self) -> None:
         print("Ce fichier contiendra l'entree de notre jeu Frogger")
-
+        print("repo bien clone")
 
 if __name__ == "__main__":
     frog = Frogger()
