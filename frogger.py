@@ -1,13 +1,8 @@
-# Fichier d'entree du jeu
+from src.main import App
 
-class Frogger:
-
-    def run(self) -> None:
-        print("Ce fichier contiendra l'entree de notre jeu Frogger")
-        print("repo bien clone")
 
 if __name__ == "__main__":
-    frog = Frogger()
+    frog = App(800, 600, "Test de la boucle de base")
     frog.run()
 
     
