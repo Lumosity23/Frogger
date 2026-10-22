@@ -14,3 +14,5 @@ def _emit(level, msg):
 
 def info(msg):  _emit("INFO", msg)
 def debug(msg): _emit("DEBUG", msg)
+def error(msg): _emit("ERROR", msg)
+def warn(msg):  _emit("WARN", msg)
