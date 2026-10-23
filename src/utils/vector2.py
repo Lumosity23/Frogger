@@ -1,10 +1,10 @@
-from math import cos, sin
+from math import cos, hypot, sin
 
 
 class Vector2:
     def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
+        self.x: float = x
+        self.y: float = y
 
     @property
     def xy(self) -> tuple[float, float]:
@@ -30,7 +30,7 @@ class Vector2:
 
     def length(self) -> float:
         """Returns the length of the vector"""
-        return (self.x**2 + self.y**2) ** (1 / 2)
+        return hypot(self.x, self.y)
 
     def distance_to(self, vector: Vector2) -> float:
         """Returns the distance to another vector"""
@@ -39,13 +39,13 @@ class Vector2:
     def normalize(self):
         """Returns the normalized vector"""
         return self / self.length()
-    
+
     def rotate(self, theta: float):
         """Rotate the vector with a angle"""
         x, y = self.xy
         self.x = x * cos(theta) - y * sin(theta)
         self.y = x * sin(theta) + y * cos(theta)
-    
+
     def pos_for_screen(self, screen_size: tuple[int, int]) -> tuple[float, float]:
         """Return the position absolute for the screen"""
         return self.x + screen_size[0] / 2, self.y + screen_size[1] / 2
