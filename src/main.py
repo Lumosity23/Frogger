@@ -5,30 +5,31 @@ from src.utils import log
 
 
 class App:
-    def __init__(self, w: int, h: int, title: str, fps: float = 60.0) -> None:
-        # Init pygame
+    def __init__(self, w: int, h: int, title: str, fps: float = 60.0, scale: float = 1.0) -> None:
+
         _ = pg.init()
         log.debug("Pygame INIT")
 
-        # Init the screen
-        self.screen_size: tuple[int, int] = w, h
-        self.screen: pg.Surface = pg.display.set_mode((w, h))
+        self.screen_size: tuple[int, int] = int(w * scale), int(h * scale)
+        self.screen: pg.Surface = pg.display.set_mode(self.screen_size)
         pg.display.set_caption(title)
         log.debug("Screen INIT")
 
-        # Init the clock and fps
         self.clock: pg.Clock = pg.time.Clock()
         self.fps: float = fps
         log.debug("Time INIT")
 
         # Other utils properties
         self.running: bool = False
-        self.grid: Grid = Grid(self.screen_size)
+        self.scale: float = scale
 
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
+        self.grid: Grid = Grid(self.screen_size, scale=self.scale)
+
         self.running = True
+        log.debug("Game is Launch !")
 
     def on_update(self) -> None:
         self.grid.on_update()
@@ -37,7 +38,6 @@ class App:
         # Clean the buffer
         _ = self.screen.fill((0, 0, 0))
 
-        # Draw on the screen
         self.grid.on_draw(screen)
 
         # Render on the screen
@@ -49,7 +49,7 @@ class App:
             if event.type == pg.QUIT:
                 pg.quit()
                 self.running = False
-                log.info("App is stoped")
+                log.info("Game is stoped")
                 return False
             if not self.grid.on_events():
                 pass
@@ -58,17 +58,14 @@ class App:
 
     def run(self) -> None:
         self.on_init()
-        # Start the loop
         while self.running:
-            # Set the frame rate
+
             _ = self.clock.tick(self.fps) / 1000  # futur dt
-            # Handle events
+
             if not self.on_events():
                 continue
-            # Update the App
             self.on_update()
-            # Draw on the buffer
             self.on_draw(self.screen)
 
         log.debug(self.grid.on_finish())
-        log.info("Program return 0")
+        log.info("App is correctly closed")

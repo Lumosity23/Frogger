@@ -14,10 +14,11 @@ from src.utils.vector2 import Vector2
 
 
 class Grid:
-    def __init__(self, screen_size: tuple[int, int], mode: str = "DEBUG"):
+    def __init__(self, screen_size: tuple[int, int], mode: str = "DEBUG", scale: float = 1.0):
         self.mode: str = mode
+        self.scale: float = scale
         self.screen_size: tuple[int, int] = screen_size
-        self.cell_size: int = 50
+        self.cell_size: int = int(50 * scale)
         self.color_line: tuple[int, int, int] = (244, 244, 244)
         self.grid: list[tuple[Vector2, Vector2]] = []
         self.new_grid: list[tuple[Vector2, Vector2]] = self.make_grid(
