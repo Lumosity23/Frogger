@@ -18,22 +18,18 @@ class Chicken:
         self.rect: pg.Rect = self.img.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.step = step
+        self.step: float = step
         self.is_alive: bool = True
-        self.face_dir = {
+        self.face_dir: dict[str, pg.Surface] = {
             "nord": pg.image.load("assets/chicken.png").convert_alpha(),
             "sud": pg.image.load("assets/chicken.png").convert_alpha(),
             "est": pg.image.load("assets/chicken.png").convert_alpha(),
-            "ouest": pg.image.load("assets/chicken.png").convert_alpha()
+            "ouest": pg.image.load("assets/chicken.png").convert_alpha(),
         }
-        self.current_dir = "nord"
+        self.current_dir: str = "nord"
 
     def draw(self, screen: pg.Surface):
         screen.blit(self.face_dir[self.current_dir], self.rect)
-        
-        
-
-
 
     def process_event(self):
         """chicken's controls"""
@@ -50,5 +46,3 @@ class Chicken:
         if keys[pg.K_DOWN]:
             self.rect.y += self.step
             return True
-
-    
