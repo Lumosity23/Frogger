@@ -15,14 +15,14 @@ if platform.system() == "Windows":
 if __name__ == "__main__":
     # Catch the argument of the scale
     parser = argparse.ArgumentParser("frogger")
-    parser.add_argument(
+    _ = parser.add_argument(
         "--scale",
         dest="scale",
         nargs="?",
         const=1,
         default=1.0,
         help="Scale the size of the Game window with a float",
-        type=float
+        type=float,
     )
     args = parser.parse_args()
 

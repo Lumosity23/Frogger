@@ -5,7 +5,9 @@ from src.utils import log
 
 
 class App:
-    def __init__(self, w: int, h: int, title: str, fps: float = 60.0, scale: float = 1.0) -> None:
+    def __init__(
+        self, w: int, h: int, title: str, fps: float = 60.0, scale: float = 1.0
+    ) -> None:
 
         _ = pg.init()
         log.debug("Pygame INIT")
@@ -59,7 +61,6 @@ class App:
     def run(self) -> None:
         self.on_init()
         while self.running:
-
             _ = self.clock.tick(self.fps) / 1000  # futur dt
 
             if not self.on_events():
