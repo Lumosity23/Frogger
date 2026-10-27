@@ -16,5 +16,8 @@ wheels/
 # Asprite
 /aseprite
 
+# tmp file/folder
+/tmp
+
 # Ajout eventuel de Ju
 # ...
