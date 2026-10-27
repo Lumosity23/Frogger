@@ -30,7 +30,7 @@ class App:
 
     def on_init(self) -> None:
         self.grid: Grid = Grid(self.screen_size, scale=self.scale, mode="PROD")
-        self.chicken = Chicken(self.screen_size[0] / 2, self.screen_size[1] / 2)
+        self.chicken = Chicken(self.screen_size[0] / 2, self.screen_size[1] / 2, self.grid.cell_size)
 
         self.running = True
         log.debug("Game is Launch !")
@@ -56,8 +56,11 @@ class App:
                 self.running = False
                 log.info("Game is stoped")
                 return False
+            if not self.chicken.process_event():
+                pass
             if not self.grid.on_events():
                 pass
+
 
         return True
 
