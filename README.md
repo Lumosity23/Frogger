@@ -17,8 +17,8 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
  
 ## Dead lines
 
- - Init le projet et le mettre sur github
- - Avoir une fenetre avec une grenouille qui sait se deplacer dans les 4 directions
+ - [done]Init le projet et le mettre sur github
+ - [30/10]Avoir une fenetre avec une grenouille qui sait se deplacer dans les 4 directions
  - Cree le systeme de voiture qui avance d'un cote a l'autre de l'ecran
  - Cree un system de colision entre la grenouille et les voiture ( a generaliser avec tout les element du decors )
  - Avoir le system de rondins de bois qui deplace la grenouille
