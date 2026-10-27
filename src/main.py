@@ -1,5 +1,6 @@
 import pygame as pg
 
+from src.entities.chicken import Chicken
 from src.map.grid import Grid
 from src.utils import log
 
@@ -28,7 +29,8 @@ class App:
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
-        self.grid: Grid = Grid(self.screen_size, scale=self.scale)
+        self.grid: Grid = Grid(self.screen_size, scale=self.scale, mode="PROD")
+        self.chicken = Chicken(self.screen_size[0] / 2, self.screen_size[1] / 2)
 
         self.running = True
         log.debug("Game is Launch !")
@@ -41,6 +43,7 @@ class App:
         _ = self.screen.fill((0, 0, 0))
 
         self.grid.on_draw(screen)
+        self.chicken.draw(screen)
 
         # Render on the screen
         pg.display.flip()

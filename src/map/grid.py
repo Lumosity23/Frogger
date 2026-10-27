@@ -14,7 +14,9 @@ from src.utils.vector2 import Vector2
 
 
 class Grid:
-    def __init__(self, screen_size: tuple[int, int], mode: str = "DEBUG", scale: float = 1.0):
+    def __init__(
+        self, screen_size: tuple[int, int], mode: str = "DEBUG", scale: float = 1.0
+    ):
         self.mode: str = mode
         self.scale: float = scale
         self.screen_size: tuple[int, int] = screen_size
