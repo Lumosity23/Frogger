@@ -2,47 +2,25 @@
 
 import pygame as pg
 
-# from src.utils.vector2 import Vector2
-
-"""@dataclass
-class Chicke:
-    x: float
-    y: float
-    pos: Vector2 = Vector2(x, self.y)"""
+from src.entities.entity import Entity
 
 
-class Chicken:
-    def __init__(self, x: float, y: float, step: float) -> None:
-        # self.pos: Vector2 = Vector2(x, y)
+class Chicken(Entity):
+    def __init__(self, col: float, row: float) -> None:
+        super().__init__(col, row)
         self.img: pg.Surface = pg.image.load("assets/chicken.png").convert_alpha()
         self.rect: pg.Rect = self.img.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.step: float = step
-        self.is_alive: bool = True
-        self.face_dir: dict[str, pg.Surface] = {
-            "nord": pg.image.load("assets/chicken.png").convert_alpha(),
-            "sud": pg.image.load("assets/chicken.png").convert_alpha(),
-            "est": pg.image.load("assets/chicken.png").convert_alpha(),
-            "ouest": pg.image.load("assets/chicken.png").convert_alpha(),
+        self.face_dir: dict[tuple[int, int], pg.Surface] = {
+            (0, -1): pg.image.load("assets/chicken.png").convert_alpha(),
+            (0, 1): pg.image.load("assets/chicken.png").convert_alpha(),
+            (1, 0): pg.image.load("assets/chicken.png").convert_alpha(),
+            (-1, 0): pg.image.load("assets/chicken.png").convert_alpha(),
         }
         self.current_dir: str = "nord"
+        self.is_alive: bool = True
 
-    def draw(self, screen: pg.Surface):
-        screen.blit(self.face_dir[self.current_dir], self.rect)
-
-    def process_event(self):
+    def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""
-        keys = pg.key.get_pressed()
-        if keys[pg.K_RIGHT]:
-            self.rect.x += self.step
-            return True
-        if keys[pg.K_LEFT]:
-            self.rect.x -= self.step
-            return True
-        if keys[pg.K_UP]:
-            self.rect.y -= self.step
-            return True
-        if keys[pg.K_DOWN]:
-            self.rect.y += self.step
-            return True
+        self.col += dcol
+        self.row += drow
+        # self.img = self.face_dir[(dcol, drow)].copy()

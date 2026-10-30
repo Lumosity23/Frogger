@@ -1,7 +1,6 @@
 import pygame as pg
 
-from src.entities.chicken import Chicken
-from src.map.grid import Grid
+from src.scene import Scene
 from src.utils import log
 
 
@@ -29,50 +28,43 @@ class App:
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
-        self.grid: Grid = Grid(self.screen_size, scale=self.scale, mode="PROD")
-        self.chicken = Chicken(self.screen_size[0] / 2, self.screen_size[1] / 2, self.grid.cell_size)
-
+        self.scene: Scene = Scene(self.screen_size)
         self.running = True
-        log.debug("Game is Launch !")
+        log.debug("Game is INIT !")
 
-    def on_update(self) -> None:
-        self.grid.on_update()
+    def on_update(self, dt: float) -> None:
+        """Update the Game"""
+        self.scene.update(dt)
 
     def on_draw(self, screen: pg.Surface) -> None:
         # Clean the buffer
         _ = self.screen.fill((0, 0, 0))
-
-        self.grid.on_draw(screen)
-        self.chicken.draw(screen)
-
+        self.scene.draw(screen)
         # Render on the screen
         pg.display.flip()
 
     def on_events(self) -> bool:
         """Return always True except for pg.QUIT"""
-        for event in pg.event.get():
+        events = pg.event.get()
+        for event in events:
             if event.type == pg.QUIT:
                 pg.quit()
                 self.running = False
                 log.info("Game is stoped")
                 return False
-            if not self.chicken.process_event():
-                pass
-            if not self.grid.on_events():
-                pass
-
+        if self.scene.handle_events(events):
+            return True
 
         return True
 
     def run(self) -> None:
         self.on_init()
         while self.running:
-            _ = self.clock.tick(self.fps) / 1000  # futur dt
-
+            dt = self.clock.tick(self.fps) / 1000
             if not self.on_events():
                 continue
-            self.on_update()
+            self.on_update(dt)
             self.on_draw(self.screen)
 
-        log.debug(self.grid.on_finish())
+        # log.debug(self.grid.on_finish())
         log.info("App is correctly closed")

@@ -1,110 +1,48 @@
-import copy
-from math import pi
+from math import ceil, floor
 
-import pygame as pg
+from pygame.rect import Rect
 
-from src.utils.vector2 import Vector2
-
-##########################################################################################
-# Utilisation des effet de distortion sur la grille                       | Arr == Arrow |
-# - "o" / "p" -> pour faire tourne la grille sur elle meme                ################
-# - ArrUP / ArrDOWN -> etire la grille verticalement                                     #
-# - ArrLEFT / ArrRIGHT -> etire la grille horizontalement                                #
-##########################################################################################
+from src.utils.projection import Projection
 
 
 class Grid:
     def __init__(
-        self, screen_size: tuple[int, int], mode: str = "DEBUG", scale: float = 1.0
+        self, screen_size: tuple[int, int], projecter: Projection, scale: float = 1.0
     ):
-        self.mode: str = mode
         self.scale: float = scale
-        self.screen_size: tuple[int, int] = screen_size
+        self.col: float = 30.0
+        self.row: float = 30.0
         self.cell_size: int = int(50 * scale)
-        self.color_line: tuple[int, int, int] = (244, 244, 244)
-        self.grid: list[tuple[Vector2, Vector2]] = []
-        self.new_grid: list[tuple[Vector2, Vector2]] = self.make_grid(
-            30, 30, self.cell_size
-        )
-        # Facteur de distortion
-        # Les valeurs par default sont celle qui se rapproche le plus de crossy road
-        self.dx: float = 1.1
-        self.dy: float = 0.7
-        self.rot: float = 15.0
-        self.theta: float = pi / 180 * self.rot
+        self.PROJ: Projection = projecter
+        self.grid: list[list[tuple[float, float]]] = self.make_grid(self.col, self.row)
 
-    def on_draw(self, screen: pg.Surface):
-        """Draw the grid on the screen"""
-        for p1, p2 in self.grid:
-            _ = pg.draw.line(
-                screen,
-                self.color_line,
-                p1.pos_for_screen(self.screen_size),
-                p2.pos_for_screen(self.screen_size),
-            )
+    def __len__(self):
+        return len(self.grid[0])
 
-    def on_events(self):
-        """Handle the events for the modifications of the grid"""
-        if self.mode == "DEBUG":
-            keys = pg.key.get_pressed()
-            if keys[pg.K_RIGHT]:
-                self.dx += 0.1
-                return True
-            if keys[pg.K_LEFT]:
-                self.dx -= 0.1
-                return True
-            if keys[pg.K_UP]:
-                self.dy += 0.1
-                return True
-            if keys[pg.K_DOWN]:
-                self.dy -= 0.1
-                return True
-            if keys[pg.K_o]:
-                self.rot -= 0.4
-                self.update_theta()
-                return True
-            if keys[pg.K_p]:
-                self.rot += 0.4
-                self.update_theta()
-                return True
+    def make_grid(self, col: float, row: float) -> list[list[tuple[float, float]]]:
+        """
+        Make a grid of tuple[col, row]
+        ```python
+        [
+            [ tuple(0,0), tuple(1,0), tuple(2,0) ],
+            [ tuple(0,1), tuple(1,1), tuple(2,1) ],
+            [ tuple(0,2), tuple(1,2), tuple(2,2) ],
+        ]
+        ```
+        where each tuple is a position of a tile --> tuple[col, row]
+        """
+        return [[(x, y) for y in range(int(row))] for x in range(int(col))]
 
-    def on_update(self) -> None:
-        """Update the shape of the grid"""
-        self.grid = self.rotate_grid(copy.deepcopy(self.new_grid), self.theta)
+    # Ceci est une methode temporaire en attendant le systeme de chunk
+    def visible_rows(self, r: Rect) -> list[tuple[float, float]]:
+        """Return the visible rows"""
+        corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
+        rows = [self.PROJ.unproject(*corner)[1] for corner in corners]
 
-    def rotate_grid(
-        self, grid: list[tuple[Vector2, Vector2]], th: float
-    ) -> list[tuple[Vector2, Vector2]]:
-        """Rotate every point of the grid"""
-        for point in grid:
-            for p in point:
-                p.rotate(th)
-                p.x *= self.dx
-                p.y *= self.dy
-        return grid
+        min_row = max(0, floor(min(rows)))
+        max_row = min(len(self.grid), ceil(max(rows)))
 
-    def make_grid(
-        self, col: int, row: int, cell_size: int
-    ) -> list[tuple[Vector2, Vector2]]:
-        """Return the new grid"""
-        grid: list[tuple[Vector2, Vector2]] = []
-        grid_w = col * cell_size
-        grid_h = row * cell_size
+        return [entity for row in self.grid[min_row:max_row] for entity in row]
 
-        for i in range(col + 1):
-            x = cell_size * i - grid_w / 2
-            grid.append((Vector2(x, 0 - grid_h / 2), Vector2(x, grid_h / 2)))
-
-        for i in range(row + 1):
-            y = cell_size * i - grid_h / 2
-            grid.append((Vector2(-grid_w / 2, y), Vector2(grid_w / 2, y)))
-
-        return grid
-
-    def update_theta(self):
-        """Update the angle of ratation for the grid"""
-        self.theta = pi / 180 * self.rot
-
-    def on_finish(self):
-        """Send the value of Distortion ofr the grid"""
-        return f"Gird : | DefX : {self.dx} | DefY : {self.dy} | THETA : {self.theta * 180 / pi} |"
+    # Ju si tu sais cree le systeme de chunk ce serai trop bien !
+    # aussi modifie `make_grid` a ta "guise" pour avoir ce que tu veux
