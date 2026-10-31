@@ -1,5 +1,3 @@
-# from dataclasses import dataclass
-
 import pygame as pg
 
 from src.entities.entity import Entity
@@ -9,7 +7,6 @@ class Chicken(Entity):
     def __init__(self, col: float, row: float) -> None:
         super().__init__(col, row)
         self.img: pg.Surface = pg.image.load("assets/chicken.png").convert_alpha()
-        self.rect: pg.Rect = self.img.get_rect()
         self.face_dir: dict[tuple[int, int], pg.Surface] = {
             (0, -1): pg.image.load("assets/chicken.png").convert_alpha(),
             (0, 1): pg.image.load("assets/chicken.png").convert_alpha(),

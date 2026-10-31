@@ -28,10 +28,21 @@ def draw_grid(
 
 
 def draw_entities(
-    screen: pg.Surface, entities: list[Entity], projecter: Projection, cam: Camera
+    screen: pg.Surface,
+    entities: list[Entity],
+    projecter: Projection,
+    cam: Camera,
+    mode: str = "PROD",
 ) -> None:
     """Draw on screen the entities"""
     fast_blit = screen.blit
     for e in z_sorting(entities, projecter):
         # 1 - projection / 2 - offset of the camera / 3 - draw on screen
-        _ = fast_blit(e.img, cam.to_view([projecter.cell_center(*e.gpos)])[0])
+        w, h = e.size
+        pos = cam.to_view([projecter.cell_center(*e.gpos)])[0]
+        # center the sprite [temporaire] --> devra aller dans la class de l'entity car propre a chacun
+        pos = pos[0] - (w / 2), pos[1] - h * 0.9
+        _ = fast_blit(e.img, pos)
+        # Draw the hitBox of the entity
+        if mode == "DEBUG":
+            _ = pg.draw.rect(screen, "RED", pg.rect.Rect(pos, e.size), width=1)

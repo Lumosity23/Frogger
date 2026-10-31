@@ -16,9 +16,6 @@ class Grid:
         self.PROJ: Projection = projecter
         self.grid: list[list[tuple[float, float]]] = self.make_grid(self.col, self.row)
 
-    def __len__(self):
-        return len(self.grid[0])
-
     def make_grid(self, col: float, row: float) -> list[list[tuple[float, float]]]:
         """
         Make a grid of tuple[col, row]
@@ -31,7 +28,7 @@ class Grid:
         ```
         where each tuple is a position of a tile --> tuple[col, row]
         """
-        return [[(x, y) for y in range(int(row))] for x in range(int(col))]
+        return [[(x, y) for x in range(int(col))] for y in range(int(row))]
 
     # Ceci est une methode temporaire en attendant le systeme de chunk
     def visible_rows(self, r: Rect) -> list[tuple[float, float]]:
