@@ -24,10 +24,10 @@ class Scene:
         self.grid: Grid = Grid(screen_size, self.PROJ, scale)
         self.cam: Camera = Camera(screen_size)
         col, row = self.PROJ.unproject(screen_size[0] / 2, screen_size[1] / 2)
-        self.chicken: Chicken = Chicken(round(col), round(row))
+        self.chicken: Chicken = Chicken(round(col) + 0.5, round(row) + 0.5)
 
     def update(self, dt: float):
-        self.cam.follow(self.PROJ.cell_center(*self.chicken.gpos), dt)
+        self.cam.follow(self.PROJ.project(*self.chicken.gpos), dt)
 
     def handle_events(self, events: list[pg.Event]) -> bool:
         for event in events:
