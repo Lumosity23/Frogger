@@ -17,19 +17,29 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
  
 ## Dead lines
 
- - [done]Init le projet et le mettre sur github
- - [30/10]Avoir une fenetre avec une grenouille qui sait se deplacer dans les 4 directions
+ - [DONE] Init le projet et le mettre sur github
+ - [DONE] Avoir une fenetre avec une chicken qui sait se deplacer dans les 4 directions
  - Cree le systeme de voiture qui avance d'un cote a l'autre de l'ecran
- - Cree un system de colision entre la grenouille et les voiture ( a generaliser avec tout les element du decors )
- - Avoir le system de rondins de bois qui deplace la grenouille
+ - Cree un system de colision entre la chicken et les voiture ( a generaliser avec tout les element du decors )
+ - Avoir le system de rondins de bois qui deplace la chicken
  - Cree un UI pour afficher le score et cree les menu de debut et fin de partie
  - Cree un system de save pour les meilleur score
- - Cree une boucle de jeu complete avec un system de time et les 5 grenouille ( condition de reussite ou de perte )
+ - Cree une boucle de jeu complete avec un system de temps et les 5 chicken a ramener au poulayer ( condition de reussite ou de perte )
 
 
-## TODO
+## TODO JU
 
-- [ ] Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README
-- [ ] Mettre au propre les `Dead lines`
-- [ ] Se repartir les tache et se syncro avec github
-- [ ] Lancer le projet et ecrire les premiere lignes de code
+- [ ] Systeme de vehicule qui bouge de droite a gauche et inversement sur la grid
+- [ ] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
+
+## TODO TIMO ( modif 31 oct 19h21 )
+
+- [x] System de projection
+- [x] Camera fonctionnel
+
+## TODO COMMUNE
+
+- [x] Se mettre d'accord sur ce qu'on fais et valider a `DEUX` ce README
+- [x] Mettre au propre les `Dead lines`
+- [x] Se repartir les tache et se syncro avec github
+- [x] Lancer le projet et ecrire les premiere lignes de code

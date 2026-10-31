@@ -48,6 +48,6 @@ class Scene:
         return False
 
     def draw(self, screen: pg.Surface) -> None:
-        visible_tiles = self.grid.visible_rows(self.cam.visible_rect)
+        visible_tiles = self.grid.get_visible_rows(self.cam.visible_rect)
         draw_grid(screen, visible_tiles, self.proj, self.cam)
         draw_entities(screen, [self.chicken], self.proj, self.cam)

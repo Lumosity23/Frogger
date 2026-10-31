@@ -31,7 +31,7 @@ class Grid:
         return [[(x, y) for x in range(int(col))] for y in range(int(row))]
 
     # Ceci est une methode temporaire en attendant le systeme de chunk
-    def visible_rows(self, r: Rect) -> list[tuple[float, float]]:
+    def get_visible_rows(self, r: Rect) -> list[tuple[float, float]]:
         """Return the visible rows"""
         corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
         rows = [self.PROJ.unproject(*corner)[1] for corner in corners]
