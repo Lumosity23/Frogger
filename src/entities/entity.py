@@ -10,6 +10,7 @@ class Entity:
     row: float
     img: pg.Surface | None = None
     is_alive: bool = False
+    clock: float = 0.0
 
     @property
     def gpos(self) -> tuple[float, float]:

@@ -29,6 +29,7 @@ class Scene:
         self.chicken: Chicken = Chicken(round(col), round(row))
 
     def update(self, dt: float):
+        self.chicken.update(dt)
         self.cam.follow(self.proj.project(*self.chicken.gpos), dt)
 
     def handle_events(self, events: list[pg.Event]) -> bool:

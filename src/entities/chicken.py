@@ -1,6 +1,12 @@
+import math
+from typing import override
+
 import pygame as pg
 
 from src.entities.entity import Entity
+
+HOP_TIME = 0.15  # durée d'un saut (s)
+HOP_HEIGHT = 0.7  # hauteur maximale du saut (px)
 
 
 class Chicken(Entity):
@@ -15,9 +21,34 @@ class Chicken(Entity):
         }
         self.current_dir: str = "nord"
         self.is_alive: bool = True
+        self.from_cell: tuple[float, float] = (col, row)
+
+    @property
+    def is_jumping(self) -> bool:
+        return self.clock < 1.0
+
+    @property
+    @override
+    def gpos(self) -> tuple[float, float]:
+        fc, fr = self.from_cell
+        return (
+            fc + (self.col - fc) * self.clock,
+            fr + ((self.row - fr) * self.clock) - self.jump(),
+        )
 
     def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""
-        self.col += dcol
-        self.row += drow
-        # self.img = self.face_dir[(dcol, drow)].copy()
+        if not self.is_jumping:
+            before = self.col, self.row
+            self.from_cell = before
+            self.col += dcol
+            self.row += drow
+            self.clock = 0.0
+
+    def update(self, dt: float) -> None:
+        if self.is_jumping:
+            self.clock = min(1.0, self.clock + dt / HOP_TIME)
+
+    def jump(self) -> float:
+        """The height of the jump"""
+        return math.sin(self.clock * math.pi) * HOP_HEIGHT
