@@ -11,7 +11,7 @@ GRASS_B = (105, 165, 80)
 
 def z_sorting(entities: list[Entity], projecter: Projection) -> list[Entity]:
     """Sort entities with a rule"""
-    return sorted(entities, key=lambda e: projecter.depth(e.col, e.row))
+    return sorted(entities, key=lambda e: projecter.depth(*e.gpos))
 
 
 def draw_grid(
@@ -39,7 +39,8 @@ def draw_entities(
     for e in z_sorting(entities, projecter):
         # 1 - projection / 2 - offset of the camera / 3 - draw on screen
         w, h = e.size
-        pos = cam.to_view([projecter.cell_center(*e.gpos)])[0]
+        ground_x, ground_y = projecter.cell_center(*e.gpos)
+        pos = cam.to_view([(ground_x, ground_y - e.lift)])[0]
         # center the sprite [temporaire] --> devra aller dans la class de l'entity car propre a chacun
         pos = pos[0] - (w / 2), pos[1] - h * 0.9
         _ = fast_blit(e.img, pos)

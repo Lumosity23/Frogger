@@ -6,14 +6,12 @@ from src.utils.projection import Projection
 
 
 class Grid:
-    def __init__(
-        self, screen_size: tuple[int, int], projecter: Projection, scale: float = 1.0
-    ):
+    def __init__(self, screen_size: tuple[int, int], tile: float, scale: float = 1.0):
         self.scale: float = scale
         self.col: float = 30.0
         self.row: float = 30.0
-        self.cell_size: int = int(50 * scale)
-        self.PROJ: Projection = projecter
+        self.tile: float = tile
+        self.cell_size: int = int(tile * scale)
         self.grid: list[list[tuple[float, float]]] = self.make_grid(self.col, self.row)
 
     def make_grid(self, col: float, row: float) -> list[list[tuple[float, float]]]:
@@ -31,10 +29,10 @@ class Grid:
         return [[(x, y) for x in range(int(col))] for y in range(int(row))]
 
     # Ceci est une methode temporaire en attendant le systeme de chunk
-    def get_visible_rows(self, r: Rect) -> list[tuple[float, float]]:
+    def get_visible_rows(self, r: Rect, proj: Projection) -> list[tuple[float, float]]:
         """Return the visible rows"""
         corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
-        rows = [self.PROJ.unproject(*corner)[1] for corner in corners]
+        rows = [proj.unproject(*corner)[1] for corner in corners]
 
         min_row = max(0, floor(min(rows)))
         max_row = min(len(self.grid), ceil(max(rows)))

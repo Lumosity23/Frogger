@@ -5,8 +5,8 @@ import pygame as pg
 
 from src.entities.entity import Entity
 
-HOP_TIME = 0.15  # durée d'un saut (s)
-HOP_HEIGHT = 0.7  # hauteur maximale du saut (px)
+HOP_TIME = 0.25  # durée d'un saut (s)
+HOP_HEIGHT = 17  # hauteur maximale du saut (px)
 
 
 class Chicken(Entity):
@@ -21,6 +21,7 @@ class Chicken(Entity):
         }
         self.current_dir: str = "nord"
         self.is_alive: bool = True
+        self.clock: float = 1.0
         self.from_cell: tuple[float, float] = (col, row)
 
     @property
@@ -29,12 +30,15 @@ class Chicken(Entity):
 
     @property
     @override
+    def lift(self) -> float:
+        return self.jump()
+
+    @property
+    @override
     def gpos(self) -> tuple[float, float]:
+        t = self.clock * self.clock * (3 - 2 * self.clock)
         fc, fr = self.from_cell
-        return (
-            fc + (self.col - fc) * self.clock,
-            fr + ((self.row - fr) * self.clock) - self.jump(),
-        )
+        return (fc + (self.col - fc) * t, fr + (self.row - fr) * t)
 
     def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""

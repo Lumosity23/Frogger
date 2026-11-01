@@ -17,5 +17,9 @@ class Entity:
         return (self.col, self.row)
 
     @property
+    def lift(self) -> float:
+        return 0.0
+
+    @property
     def size(self) -> tuple[int, int]:
         return self.img.get_size()

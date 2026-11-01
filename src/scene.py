@@ -20,24 +20,24 @@ MOVES: dict[int, tuple[int, int]] = {
 class Scene:
     def __init__(self, screen_size: tuple[int, int], scale: float = 1.0) -> None:
         # Elements of the game
-        self.FLAT: Projection = Projection.flat(50 * scale)
-        self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, 50 * scale)
+        tile: float = 50
+        self.FLAT: Projection = Projection.flat(tile * scale)
+        self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, tile * scale)
         self.proj: Projection = self.DEFO
-        self.grid: Grid = Grid(screen_size, self.proj, scale)
+        self.grid: Grid = Grid(screen_size, tile, scale)
         self.cam: Camera = Camera(screen_size)
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(col), round(row))
 
     def update(self, dt: float):
         self.chicken.update(dt)
-        self.cam.follow(self.proj.project(*self.chicken.gpos), dt)
+        self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
 
     def handle_events(self, events: list[pg.Event]) -> bool:
         for event in events:
             if event.type == pg.KEYDOWN:
                 if event.key in MOVES:
                     self.chicken.move(*MOVES[event.key])
-                    return True
                 if event.key == pg.K_p:
                     if self.proj == self.DEFO:
                         self.proj = self.FLAT
@@ -49,6 +49,6 @@ class Scene:
         return False
 
     def draw(self, screen: pg.Surface) -> None:
-        visible_tiles = self.grid.get_visible_rows(self.cam.visible_rect)
+        visible_tiles = self.grid.get_visible_rows(self.cam.visible_rect, self.proj)
         draw_grid(screen, visible_tiles, self.proj, self.cam)
         draw_entities(screen, [self.chicken], self.proj, self.cam)
