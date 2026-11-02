@@ -27,7 +27,7 @@ class Scene:
         self.grid: Grid = Grid(screen_size, tile, scale)
         self.cam: Camera = Camera(screen_size)
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
-        self.chicken: Chicken = Chicken(round(col), round(row))
+        self.chicken: Chicken = Chicken(round(col), round(row), scale)
 
     def update(self, dt: float):
         self.chicken.update(dt)

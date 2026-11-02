@@ -28,7 +28,7 @@ class App:
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
-        self.scene: Scene = Scene(self.screen_size)
+        self.scene: Scene = Scene(self.screen_size, self.scale)
         self.running = True
         log.debug("Game is INIT !")
 

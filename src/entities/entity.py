@@ -8,6 +8,7 @@ from pygame.rect import Rect
 class Entity:
     col: float
     row: float
+    scale: float
     img: pg.Surface | None = None
     is_alive: bool = False
     clock: float = 0.0

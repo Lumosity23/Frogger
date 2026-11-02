@@ -2,6 +2,7 @@ import math
 from typing import override
 
 import pygame as pg
+from pygame.math import Vector2
 
 from src.entities.entity import Entity
 
@@ -10,9 +11,12 @@ HOP_HEIGHT = 17  # hauteur maximale du saut (px)
 
 
 class Chicken(Entity):
-    def __init__(self, col: float, row: float) -> None:
-        super().__init__(col, row)
+    def __init__(self, col: float, row: float, scale: float = 1.0) -> None:
+        super().__init__(col, row, scale)
         self.img: pg.Surface = pg.image.load("assets/chicken.png").convert_alpha()
+        self.img: pg.Surface = pg.transform.scale(
+            self.img, Vector2(self.img.get_size()) * scale
+        )
         self.face_dir: dict[tuple[int, int], pg.Surface] = {
             (0, -1): pg.image.load("assets/chicken.png").convert_alpha(),
             (0, 1): pg.image.load("assets/chicken.png").convert_alpha(),
@@ -55,4 +59,4 @@ class Chicken(Entity):
 
     def jump(self) -> float:
         """The height of the jump"""
-        return math.sin(self.clock * math.pi) * HOP_HEIGHT
+        return math.sin(self.clock * math.pi) * (HOP_HEIGHT * self.scale)
