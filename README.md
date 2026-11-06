@@ -30,7 +30,7 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
 ## TODO JU
 
 - [ ] Systeme de vehicule qui bouge de droite a gauche et inversement sur la grid
-- [ ] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
+- [x] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
 
 ## TODO TIMO ( modif 31 oct 19h21 )
 
