@@ -1,29 +1,22 @@
 import math
+import os 
 from typing import override
 
 import pygame as pg
-from pygame.math import Vector2
 
 from src.entities.entity import Entity
 
 HOP_TIME = 0.25  # durée d'un saut (s)
 HOP_HEIGHT = 17  # hauteur maximale du saut (px)
 
+ASSETS = f"{os.path.abspath("../.. ")}assets"
+
 
 class Chicken(Entity):
     def __init__(self, col: float, row: float, scale: float = 1.0) -> None:
-        super().__init__(col, row, scale)
-        self.img: pg.Surface = pg.image.load("assets/chicken.png").convert_alpha()
-        self.img: pg.Surface = pg.transform.scale(
-            self.img, Vector2(self.img.get_size()) * scale
-        )
-        self.face_dir: dict[tuple[int, int], pg.Surface] = {
-            (0, -1): pg.image.load("assets/chicken.png").convert_alpha(),
-            (0, 1): pg.image.load("assets/chicken.png").convert_alpha(),
-            (1, 0): pg.image.load("assets/chicken.png").convert_alpha(),
-            (-1, 0): pg.image.load("assets/chicken.png").convert_alpha(),
-        }
-        self.current_dir: str = "nord"
+        super().__init__(col, row, scale) 
+        self.face_dir: dict[tuple[int, int], pg.Surface] = self.get_faces("assets/chicken_faces.png", scale)
+        self.img = self.face_dir[(0, 1)].copy()
         self.is_alive: bool = True
         self.clock: float = 1.0
         self.from_cell: tuple[float, float] = (col, row)
@@ -44,6 +37,11 @@ class Chicken(Entity):
         fc, fr = self.from_cell
         return (fc + (self.col - fc) * t, fr + (self.row - fr) * t)
 
+    def get_faces(self, path: str, scale: float) -> dict[tuple[int,int], pg.Surface]:
+        directions= [(-1,0), (0,1), (1,0), (0,-1)]
+          
+        return {dir : img for dir, img in zip(directions, self.get_anim(4, path, scale).values())}
+
     def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""
         if not self.is_jumping:
@@ -52,7 +50,8 @@ class Chicken(Entity):
             self.col += dcol
             self.row += drow
             self.clock = 0.0
-
+            self.img = self.face_dir[dcol, drow].copy()
+        
     def update(self, dt: float) -> None:
         if self.is_jumping:
             self.clock = min(1.0, self.clock + dt / HOP_TIME)
@@ -60,3 +59,5 @@ class Chicken(Entity):
     def jump(self) -> float:
         """The height of the jump"""
         return math.sin(self.clock * math.pi) * (HOP_HEIGHT * self.scale)
+
+

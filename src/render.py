@@ -1,6 +1,4 @@
 import pygame as pg
-
-from src.entities.chicken import Chicken
 from src.entities.entity import Entity
 from src.utils.camera import Camera
 from src.utils.projection import Projection

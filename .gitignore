@@ -21,3 +21,7 @@ wheels/
 
 # Ajout eventuel de Ju
 # ...
+
+# git add . -> tout ajouter
+# git commit -m "mon message"
+# git push frogger
