@@ -32,7 +32,7 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
 - [x] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
 - [ ] dessin
 
-## TODO TIMO ( modif 31 oct 19h21 )
+## TODO TIMO ( modif 07 nov 14h49 )
 
 - [x] System de projection
 - [x] Camera fonctionnel
