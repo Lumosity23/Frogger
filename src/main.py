@@ -39,7 +39,9 @@ class App:
     def on_draw(self, screen: pg.Surface) -> None:
         # Clean the buffer
         _ = self.screen.fill((0, 0, 0))
+
         self.scene.draw(screen)
+
         # Render on the screen
         pg.display.flip()
 
