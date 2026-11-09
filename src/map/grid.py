@@ -1,6 +1,8 @@
 from math import ceil, floor
 from src.utils.log import debug
 
+#from numpy import random 
+
 from pygame.rect import Rect
 
 from src.utils.projection import Projection
@@ -11,18 +13,17 @@ from src.entities.entity import Entity
 
 
 class Grid:
-    def __init__(self, screen_size: tuple[int, int], tile: float, scale: float = 1.0):
+    def __init__(self, grid_size: tuple[int, int], tile: float, scale: float = 1.0):
         self.scale: float = scale
-        self.col: float = 30
-        self.row: float = 30
+        self.col: float = grid_size[0]
+        self.row: float = grid_size[1]
         self.tile: float = tile
         self.cell_size: int = int(tile * scale)
         self.grid: dict[int, Chunk] = self.make_grid()
         self.tiles:list[list[tuple[float, float]]] = self.make_tiles(self.col, self.row)
 
     def make_tiles(self, col: float, row: float) -> list[list[tuple[float, float]]]:
-        """
-        Make a grid of tuple[col, row]
+        """Make a grid of tuple[col, row]
         ```python
         [
             [ tuple(0,0), tuple(1,0), tuple(2,0) ],
@@ -32,7 +33,6 @@ class Grid:
         ```
         where each tuple is a position of a tile --> tuple[col, row]
         """
-
         return [[(x, y) for x in range(int(col))] for y in range(int(row))]
 
     def make_grid(self) -> dict[int, Chunk]:
@@ -66,13 +66,10 @@ class Grid:
         return all_entities
 
 
+    # def type de monde -> dans generate_word.py
 
 
     def update(self, dt: float):
         for chunk in self.grid.values():
             chunk.update(dt)
 
-
-
-    # Ju si tu sais cree le systeme de chunk ce serai trop bien !
-    # aussi modifie `make_tiles` a ta "guise" pour avoir ce que tu veux

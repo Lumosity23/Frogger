@@ -52,8 +52,8 @@ class Chicken(Entity):
     def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""
         if not self.is_jumping:
-            before = self.col, self.row
-            self.from_cell = before
+            self.last_pos = (self.col, self.row)
+            self.from_cell = self.last_pos
             self.col += dcol
             self.row += drow
             self.clock = 0.0

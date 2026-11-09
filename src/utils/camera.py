@@ -16,7 +16,7 @@ class Camera:
         return Rect(self.offset.x, self.offset.y, *self.screen_size)
 
     def follow(self, entity_position: tuple[float, float], dt: float):
-        """follow an entity ( eg : chicken )"""
+        """follow an entity ( ex : chicken )"""
         ideal = Vector2(entity_position) - self.screen_center
         self.offset += (ideal - self.offset) * min(1.0, 8.0 * dt)
 

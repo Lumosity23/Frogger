@@ -27,17 +27,15 @@ Realiser un jeu video en 2D pixel-art avec pygame_ce et pygame_gui qui remplis l
  - Cree une boucle de jeu complete avec un system de temps et les 5 chicken a ramener au poulayer ( condition de reussite ou de perte )
 
 
-## TODO JU ( modif 06 nov 20h07 )
-- [ ] Systeme de vehicule qui bouge de droite a gauche et inversement sur la grid
-- [x] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
-- [ ] dessin
+## TODO JU
 
-## TODO TIMO ( modif 07 nov 14h49 )
+- [ ] Systeme de vehicule qui bouge de droite a gauche et inversement sur la grid
+- [ ] Cree un system de chunk sur base de la methode [get_visible_rows](src/map/grid.py) deja existante
+
+## TODO TIMO ( modif 31 oct 19h21 )
 
 - [x] System de projection
 - [x] Camera fonctionnel
-- [ ] Systeme de creation de bouton pour le UI
-- [ ] trouver une solution pour les differents zone du jeu
 
 ## TODO COMMUNE
 

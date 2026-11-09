@@ -25,7 +25,11 @@ class Chunk:
     def __iadd__(self, entity: Entity) -> Chunk:  # chunk += entity
         entity.row = self.row
         self.entities.append(entity)
-        return self  # c'est cette ligne qui manquais pour bien faire fonctionner __iadd__ !
+        return self  # c'est cette ligne qui manquais pour bien faire fonctionner __iadd__ ! OMG
+
+    def __iminus__(self, entity: Entity) -> Chunk:
+        self.entities.remove(entity)
+        return self
 
     def append(self, entity: Entity):
         entity.row = self.row
