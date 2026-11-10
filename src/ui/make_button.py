@@ -1,4 +1,3 @@
-import json
 import os
 
 import pygame as pg
@@ -7,7 +6,6 @@ import pygame_gui.elements as pui
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))
 ASSETS = os.path.join(ROOT_PROJECT, "assets")
-THEME_OUT = os.path.join(HERE, "theme.json")
 RESOLUTION = 6  # 4 px ecran = 1 px image
 
 DARKER = -25
@@ -19,12 +17,32 @@ def get_theme(
 ) -> dict[str, dict[str, dict[str, dict[str, str]]]]:
     theme = {
         f"#btn_{text}": {
+            "misc": {
+                "shadow_width": "0",
+                "border_width": "0",
+            },
+            "colours": {
+                "normal_bg": "#00000000",
+                "hovered_bg": "#00000000",
+                "selected_bg": "#00000000",
+                "disabled_bg": "#00000000",
+                "active_bg": "#00000000",  # état pendant le clic maintenu
+                "normal_border": "#00000000",
+                "hovered_border": "#00000000",
+                "selected_border": "#00000000",
+                "active_border": "#00000000",
+                "disabled_border": "#00000000",
+                "normal_text": "#FFFFFF",
+                "selected_text": "#FFFFFF",
+                "active_text": "#FFFFFF",
+                "hovered_text": "#FFFFFF",
+            },
             "images": {
                 "normal_image": make_shape(rect, color, text, "normal"),
                 # "hovered_image": make_shape(rect, color, text, "hovered"),  # ne sert a rien pour l'instant
                 "selected_image": make_shape(rect, color, text, "selected"),
                 # "disabled_image": make_shape(rect, color, text, "disabled"),  # ne sert a rien pour l'instant
-            }
+            },
         }
     }
     return theme
@@ -82,16 +100,3 @@ def make_shape(
     pg.image.save(bs, PATH)
 
     return {"path": PATH}
-
-
-def button(rect: pg.Rect, color: tuple[int, int, int], text: str) -> pui.UIButton:
-    new_text = text.replace(" ", "")
-    theme = get_theme(rect, color, new_text)
-    with open(THEME_OUT, "w") as file:
-        json.dump(theme, file)
-
-    return pui.UIButton(rect, text, object_id=f"#btn_{new_text}")
-
-
-if __name__ == "__main__":
-    print(button(pg.Rect(0, 0, 200, 80), (134, 230, 67), "button de test"))

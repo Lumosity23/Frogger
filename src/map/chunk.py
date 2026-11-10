@@ -19,15 +19,16 @@ class Chunk:
             e.col += step
             e.update(dt)
 
-    def __getitem__(self, index):  # chunk[i]
+    def __getitem__(self, index: int) -> Entity:  # chunk[i]
         return self.entities[index]
 
     def __iadd__(self, entity: Entity) -> Chunk:  # chunk += entity
         entity.row = self.row
+        entity.last_pos = entity.col, self.row
         self.entities.append(entity)
         return self  # c'est cette ligne qui manquais pour bien faire fonctionner __iadd__ ! OMG
 
-    def __iminus__(self, entity: Entity) -> Chunk:
+    def __isub__(self, entity: Entity) -> Chunk:
         self.entities.remove(entity)
         return self
 
