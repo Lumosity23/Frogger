@@ -12,6 +12,7 @@ class Entity:
     is_alive: bool = False
     duration: float = 1
     clock: float = 0.0
+    lsize: tuple[float, float] = (1.0, 1.0)
 
     def __post_init__(self):
         last_pos: tuple[float, float] = self.col, self.row
@@ -27,6 +28,15 @@ class Entity:
     @property
     def size(self) -> tuple[int, int]:
         return self.img.get_size()
+
+    @property
+    def logic_rect(self) -> tuple[float, float, float, float]:
+        return (self.col, self.row, *self.lsize)
+
+    def resize_lr(self, point: tuple[float, float]) -> pg.Rect:
+        """Resize the logic rect with a Point"""
+        size = self.lsize[0] * point[0], self.lsize[1] * point[1]
+        return pg.Rect(self.col, self.row, *size)
 
     def update(self, dt: float):
         if getattr(self, "imgs") is not None:

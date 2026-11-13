@@ -1,7 +1,6 @@
 import os
 
 import pygame as pg
-import pygame_gui.elements as pui
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))

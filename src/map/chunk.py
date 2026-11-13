@@ -6,7 +6,8 @@ from src.entities.entity import Entity
 @dataclass
 class Chunk:
     row: int
-    velocity: float = 0.0
+    # tiles: list[tuple[int, int]]
+    velocity: float = 1.0
     direction: int = 1
     type: str = "SAFE"
 

@@ -25,6 +25,7 @@ class Chicken(Entity):
         self.clock: float = 1.0
         self.from_cell: tuple[float, float] = (col, row)
         self.last_pos = (self.col, self.row)
+        self.lsize = 0.6, 0.6
 
     @property
     def is_jumping(self) -> bool:

@@ -1,10 +1,17 @@
 import pygame as pg
+
 from src.entities.entity import Entity
 from src.utils.camera import Camera
 from src.utils.projection import Projection
 
 GRASS_A = (120, 180, 90)
 GRASS_B = (105, 165, 80)
+
+
+def debug_rect(entity: Entity, pos: tuple[float, float], tile: float) -> pg.Rect:
+    resize_rect = entity.resize_lr((tile, tile))
+    resize_rect.center = pos
+    return resize_rect
 
 
 def z_sorting(entities: list[Entity], projecter: Projection) -> list[Entity]:
@@ -30,6 +37,7 @@ def draw_entities(
     entities: list[Entity],
     projecter: Projection,
     cam: Camera,
+    tile: float,
     mode: str = "PROD",
 ) -> None:
     """Draw on screen the entities"""
@@ -39,9 +47,10 @@ def draw_entities(
         w, h = e.size
         ground_x, ground_y = projecter.cell_center(*e.gpos)
         pos = cam.to_view([(ground_x, ground_y - e.lift)])[0]
+        center_pos = cam.to_view([(ground_x, ground_y)])[0]
         # center the sprite [temporaire] --> devra aller dans la class de l'entity car propre a chacun
         pos = pos[0] - (w / 2), pos[1] - h * 0.9
         _ = fast_blit(e.img, pos)
         # Draw the hitBox of the entity
         if mode == "DEBUG":
-            _ = pg.draw.rect(screen, "RED", pg.rect.Rect(pos, e.size), width=1)
+            _ = pg.draw.rect(screen, "RED", debug_rect(e, center_pos, tile), width=1)
