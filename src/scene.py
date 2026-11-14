@@ -3,6 +3,7 @@ import pygame as pg
 import src.map.generate_world as gw
 from src.entities.chicken import Chicken
 from src.entities.haybale import HayBale
+from src.map.chunk import Chunk
 from src.map.grid import Grid
 from src.render import *
 from src.utils import log
@@ -41,8 +42,8 @@ class Scene:
 
     def update(self, dt: float):
         self.grid.update(dt)
-        self.update_chicken_chunk()
         if self.chicken.is_alive:
+            self.update_chicken_chunk()
             self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
 
     def handle_events(self, event: pg.Event) -> bool:
@@ -77,6 +78,28 @@ class Scene:
         elif last_row != new_row:
             self.grid.grid[last_row] -= self.chicken
             self.grid.grid[new_row] += self.chicken
+
+    def get_chicken_chunk(self) -> Chunk | int:
+        chunk = -1
+        if self.chicken.is_alive:
+            chunk = self.grid.grid.get(int(self.chicken.row), -1)
+            if isinstance(chunk, Chunk) and self.chicken in chunk:
+                return chunk
+        return -1
+
+    def chicken_is_collide(self, is_center: bool = False) -> bool:
+        """Return if the chicken is collide with a entity | if the center of the chicken_lr is on a entity"""
+        chunk = self.get_chicken_chunk()
+        tile = (self.tile, self.tile)
+        if isinstance(chunk, Chunk):
+            chicken_rect = self.chicken.resize_lr(tile)
+            for e in chunk:
+                entity_rect = e.resize_lr(tile)
+                if not isinstance(e, Chicken) and chicken_rect.colliderect(entity_rect):
+                    if is_center:
+                        return entity_rect.collidepoint(chicken_rect.center)
+                    return True
+        return False
 
     def prep_world(self):
         gw.generate_world()
