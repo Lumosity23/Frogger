@@ -42,7 +42,8 @@ def draw_entities(
 ) -> None:
     """Draw on screen the entities"""
     fast_blit = screen.blit
-    for e in z_sorting(entities, projecter):
+    pieces = [p for e in entities for p in e.pieces()]
+    for e in z_sorting(pieces, projecter):
         if not e.is_alive:
             continue 
         # 1 - projection / 2 - offset of the camera / 3 - draw on screen

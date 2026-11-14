@@ -1,5 +1,3 @@
-
-
 from dataclasses import dataclass
 
 import pygame as pg
@@ -11,13 +9,14 @@ class Entity:
     row: float
     scale: float
     img: pg.Surface | None = None
+    is_movable: bool = True
     is_alive: bool = False
     duration: float = 1
     clock: float = 0.0
     lsize: tuple[float, float] = (1.0, 1.0)
 
     def __post_init__(self):
-        last_pos: tuple[float, float] = self.col, self.row
+        self.last_pos: tuple[float, float] = self.col, self.row
 
     @property
     def gpos(self) -> tuple[float, float]:
@@ -40,23 +39,22 @@ class Entity:
         size = self.lsize[0] * point[0], self.lsize[1] * point[1]
         return pg.Rect(self.col, self.row, *size)
 
+    def pieces(self) -> list["Entity"]:
+        """Ce qui est dessiné pour cette entité (surchargé par les groupes)"""
+        return [self]
+
     def update(self, dt: float):
-        if getattr(self, "imgs") is not None:
+        if getattr(self, "imgs", None) is not None:
             self.update_anim(dt)
 
     def get_anim(self, n: int, path: str, scale: float) -> dict[int, pg.Surface]:
-        slice_img = {}
         image = pg.image.load(path).convert_alpha()
         image = pg.transform.scale(image, pg.math.Vector2(image.get_size()) * scale)
-        w = image.width / n
+        w = image.width // n
         h = image.height
-        for x in range(n):
-            slice = image.subsurface(pg.Rect(x * w, 0, w, h))
-            slice_img[x] = slice
+        return {x: image.subsurface(pg.Rect(x * w, 0, w, h)).copy() for x in range(n)}
 
-        return slice_img
-
-    def update_anim(self, dt):
+    def update_anim(self, dt: float):
         n: float = len(self.imgs)
         step: float = self.duration / n
         self.clock += dt

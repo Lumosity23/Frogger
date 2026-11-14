@@ -6,7 +6,7 @@ from src.entities.entity import Entity
 @dataclass
 class Chunk:
     row: int
-    velocity: float = 0.0
+    velocity: float = 1.0
     direction: int = 1
     type: str = "SAFE"
 
@@ -20,7 +20,8 @@ class Chunk:
     def update(self, dt: float):
         step: float = dt * self.velocity * self.direction
         for e in self.entities:
-            e.col += step
+            if e.is_movable:
+                e.col += step
             e.update(dt)
 
     def __getitem__(self, index: int) -> Entity:  # chunk[i]
@@ -35,7 +36,3 @@ class Chunk:
     def __isub__(self, entity: Entity) -> Chunk:
         self.entities.remove(entity)
         return self
-
-    def append(self, entity: Entity):
-        entity.row = self.row
-        self.entities.append(entity)

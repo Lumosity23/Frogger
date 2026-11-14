@@ -1,26 +1,26 @@
 from math import ceil, floor
-from src.utils.log import debug
 
-#from numpy import random 
-
+# from numpy import random
 from pygame.rect import Rect
 
-from src.utils.projection import Projection
-
+from src.entities.entity import Entity
 from src.map.chunk import Chunk
 
-from src.entities.entity import Entity
+# from src.utils.log import debug
+from src.utils.projection import Projection
 
 
 class Grid:
     def __init__(self, grid_size: tuple[int, int], tile: float, scale: float = 1.0):
         self.scale: float = scale
-        self.col: float = grid_size[0]
-        self.row: float = grid_size[1]
+        self.col: int = grid_size[0]
+        self.row: int = grid_size[1]
         self.tile: float = tile
         self.cell_size: int = int(tile * scale)
         self.grid: dict[int, Chunk] = self.make_grid()
-        self.tiles:list[list[tuple[float, float]]] = self.make_tiles(self.col, self.row)
+        self.tiles: list[list[tuple[float, float]]] = self.make_tiles(
+            self.col, self.row
+        )
 
     def make_tiles(self, col: float, row: float) -> list[list[tuple[float, float]]]:
         """Make a grid of tuple[col, row]
@@ -42,7 +42,7 @@ class Grid:
         return grid
 
     # Ceci est une methode temporaire en attendant le systeme de chunk
-    def get_visible_rows(self, r: Rect, proj: Projection) -> list[tuple[float, float]]:
+    def get_visible_rows(self, r: Rect, proj: Projection) -> tuple[int, int]:
         """Return the visible rows"""
         corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
         rows = [proj.unproject(*corner)[1] for corner in corners]
@@ -58,18 +58,15 @@ class Grid:
 
     def get_visible_entities(self, rect: Rect, proj: Projection) -> list[Entity]:
         minr, maxr = self.get_visible_rows(rect, proj)
-        all_entities = []
+        all_entities: list[Entity] = []
         for key in range(minr, maxr):
             chunk = self.grid[key]
             for e in chunk:
                 all_entities.append(e)
         return all_entities
 
-
     # def type de monde -> dans generate_word.py
-
 
     def update(self, dt: float):
         for chunk in self.grid.values():
             chunk.update(dt)
-
