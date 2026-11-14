@@ -6,6 +6,7 @@ from src.map.grid import Grid
 from src.render import *
 from src.utils import log
 from src.utils.camera import Camera
+import src.map.generate_world as gw
 
 # from entities.entity import Entity
 from src.utils.projection import Projection
@@ -17,16 +18,19 @@ MOVES: dict[int, tuple[int, int]] = {
     pg.K_DOWN: (0, 1),
 }
 
+#appeler get_seed
+
 
 class Scene:
     def __init__(self, screen_size: tuple[int, int], scale: float = 1.0) -> None:
         # Elements of the game
         self.tile: float = 50.0
-        grid_size: tuple = (45, 30)
+        grid_size: tuple = (15, 15)
         self.mode: str = "PROD"
         self.FLAT: Projection = Projection.flat(self.tile * scale)
         self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, self.tile * scale)
         self.proj: Projection = self.DEFO
+        self.prep_world()
         self.grid: Grid = Grid(grid_size, self.tile, scale)
         self.cam: Camera = Camera(screen_size)
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
@@ -38,7 +42,8 @@ class Scene:
     def update(self, dt: float):
         self.grid.update(dt)
         self.update_chicken_chunk()
-        self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
+        if self.chicken.is_alive:
+            self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
 
     def handle_events(self, event: pg.Event) -> bool:
         if event.type == pg.KEYDOWN:
@@ -65,7 +70,17 @@ class Scene:
     def update_chicken_chunk(self):
         last_row = int(self.chicken.last_pos[1])
         new_row = int(self.chicken.row)
-
-        if last_row != new_row:
+        max_row = self.grid.row - 1
+        min_row = 0
+        if new_row > max_row  or new_row < min_row:
+            self.chicken.is_alive = False
+        elif last_row != new_row:
             self.grid.grid[last_row] -= self.chicken
             self.grid.grid[new_row] += self.chicken
+
+    def prep_world():
+        gw.generate_world()
+        gw.generate_entity()
+
+
+

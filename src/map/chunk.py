@@ -6,10 +6,13 @@ from src.entities.entity import Entity
 @dataclass
 class Chunk:
     row: int
-    # tiles: list[tuple[int, int]]
-    velocity: float = 1.0
+    velocity: float = 0.0
     direction: int = 1
     type: str = "SAFE"
+
+    @property
+    def logic_size(self) -> int:
+        return sum([int(e.lsize[0]) for e in self.entities])
 
     def __post_init__(self):
         self.entities: list[Entity] = []

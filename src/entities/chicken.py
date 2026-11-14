@@ -53,6 +53,7 @@ class Chicken(Entity):
 
     def move(self, dcol: int, drow: int) -> None:
         """chicken's controls"""
+        if not self.is_alive : return         
         if not self.is_jumping:
             self.last_pos = (self.col, self.row)
             self.from_cell = self.last_pos

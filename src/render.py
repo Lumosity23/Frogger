@@ -43,6 +43,8 @@ def draw_entities(
     """Draw on screen the entities"""
     fast_blit = screen.blit
     for e in z_sorting(entities, projecter):
+        if not e.is_alive:
+            continue 
         # 1 - projection / 2 - offset of the camera / 3 - draw on screen
         w, h = e.size
         ground_x, ground_y = projecter.cell_center(*e.gpos)

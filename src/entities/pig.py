@@ -7,7 +7,7 @@ from src.entities.entity import Entity
 ASSETS = f"{os.path.abspath(".")}\\assets\\"
 #PATH = f"{ASSETS}tractor_anim.png"
 
-class Tractor(Entity):
+class Pig(Entity):
     def __init__(self, col, row, scale):
         super().__init__(col, row, scale)
         #self.duration = 0.7
