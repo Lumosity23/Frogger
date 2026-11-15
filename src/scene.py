@@ -3,6 +3,7 @@ import pygame as pg
 import src.map.generate_world as gw
 from src.entities.chicken import Chicken
 from src.entities.haybale import HayBale
+from src.entities.pig import Pig
 from src.map.chunk import Chunk
 from src.map.grid import Grid
 from src.render import *
@@ -37,8 +38,10 @@ class Scene:
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(grid_size[0] / 2), 1, scale)
         self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
+        self.pig: Pig = Pig(round(col - 10), round(row), scale)
         self.grid.grid[18] += self.haybale
         self.grid.grid[28] += self.chicken
+        self.grid.grid[13] += self.pig
 
     def update(self, dt: float):
         self.grid.update(dt)

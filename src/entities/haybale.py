@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from typing import override
 
 from src.entities.group import EntityGroup
 
@@ -16,3 +16,9 @@ class HayBale(EntityGroup):
         self.lsize = (4, 1)
         self.imgs = self.get_anim(8, PATH, scale)  # une frame = une case
         self.img = self.imgs[0]
+        self.lift_val = -10.0
+
+    @property
+    @override
+    def lift(self) -> float:
+        return self.lift_val

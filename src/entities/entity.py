@@ -13,6 +13,7 @@ class Entity:
     is_alive: bool = False
     duration: float = 1
     clock: float = 0.0
+    lift_val: float = 0.0
     lsize: tuple[float, float] = (1.0, 1.0)
 
     def __post_init__(self):
@@ -24,7 +25,7 @@ class Entity:
 
     @property
     def lift(self) -> float:
-        return 0.0
+        return self.lift_val
 
     @property
     def size(self) -> tuple[int, int]:
