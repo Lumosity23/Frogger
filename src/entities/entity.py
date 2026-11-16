@@ -13,6 +13,7 @@ class Entity:
     is_alive: bool = False
     duration: float = 1
     clock: float = 0.0
+    lift_val: float = 0.0
     lsize: tuple[float, float] = (1.0, 1.0)
 
     def __post_init__(self):
@@ -24,7 +25,7 @@ class Entity:
 
     @property
     def lift(self) -> float:
-        return 0.0
+        return self.lift_val
 
     @property
     def size(self) -> tuple[int, int]:
@@ -36,8 +37,9 @@ class Entity:
 
     def resize_lr(self, point: tuple[float, float]) -> pg.Rect:
         """Resize the logic rect with a Point"""
-        size = self.lsize[0] * point[0], self.lsize[1] * point[1]
-        return pg.Rect(self.col, self.row, *size)
+        x, y = point
+        size = self.lsize[0] * x, self.lsize[1] * y
+        return pg.Rect(self.col * x, self.row * y, *size)
 
     def pieces(self) -> list["Entity"]:
         """Ce qui est dessiné pour cette entité (surchargé par les groupes)"""

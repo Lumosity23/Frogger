@@ -7,6 +7,13 @@ from src.utils.projection import Projection
 GRASS_A = (120, 180, 90)
 GRASS_B = (105, 165, 80)
 
+CHUNK_TYPES: dict[str, tuple[tuple[int, int, int], tuple[int, int, int]]] = {
+    "SAFE": ((120, 180, 90), (105, 165, 80)),
+    "ROAD": ((172, 197, 174), (143, 158, 144)),
+    "PIG": ((126, 85, 22), (126, 85, 22)),
+    "END": ((120, 180, 90), (105, 165, 80)),
+}
+
 
 def debug_rect(entity: Entity, pos: tuple[float, float], tile: float) -> pg.Rect:
     resize_rect = entity.resize_lr((tile, tile))
@@ -21,15 +28,18 @@ def z_sorting(entities: list[Entity], projecter: Projection) -> list[Entity]:
 
 def draw_grid(
     screen: pg.Surface,
-    visible_tiles: list[tuple[float, float]],
+    visible_tiles: list[tuple[str, list[tuple[int, int]]]],
     projecter: Projection,
     cam: Camera,
 ) -> None:
     """Draw on screen the tiles of the grid"""
-    for c, r in visible_tiles:
-        color = GRASS_A if (c + r) % 2 == 0 else GRASS_B
-        # 1 - projection / 2 - offset of the camera / 3 - draw on screen
-        _ = pg.draw.polygon(screen, color, cam.to_view(projecter.tile_corners(c, r)))
+    for ct, tiles in visible_tiles:
+        for c, r in tiles:
+            color = CHUNK_TYPES[ct][0] if (c + r) % 2 == 0 else CHUNK_TYPES[ct][1]
+            # 1 - projection / 2 - offset of the camera / 3 - draw on screen
+            _ = pg.draw.polygon(
+                screen, color, cam.to_view(projecter.tile_corners(c, r))
+            )
 
 
 def draw_entities(
@@ -45,7 +55,7 @@ def draw_entities(
     pieces = [p for e in entities for p in e.pieces()]
     for e in z_sorting(pieces, projecter):
         if not e.is_alive:
-            continue 
+            continue
         # 1 - projection / 2 - offset of the camera / 3 - draw on screen
         w, h = e.size
         ground_x, ground_y = projecter.cell_center(*e.gpos)

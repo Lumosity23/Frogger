@@ -1,1 +1,0 @@
-# Initialise le ui (bouttons, menu, jeu)

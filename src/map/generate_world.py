@@ -4,7 +4,7 @@
 
 # SAFE type sui accept que chicken
 # move uptade pas vitesse chicken
-# entities avec lsize -> varie entre 1 et 10 000
+# entities avec lsize -> varie entre 1 et 10 000 ( et plus encore.... )
 # condition de passage, nb entities déjà présente dans chunk --> logic_size
 
 import numpy as np

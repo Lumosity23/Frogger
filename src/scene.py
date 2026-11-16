@@ -1,8 +1,11 @@
+from collections.abc import Callable
+
 import pygame as pg
 
-import src.map.generate_world as gw
+# import src.map.generate_world as gw
 from src.entities.chicken import Chicken
 from src.entities.haybale import HayBale
+from src.entities.pig import Pig
 from src.map.chunk import Chunk
 from src.map.grid import Grid
 from src.render import *
@@ -11,45 +14,84 @@ from src.utils.camera import Camera
 
 # from entities.entity import Entity
 from src.utils.projection import Projection
+from src.utils.score import score
 
 MOVES: dict[int, tuple[int, int]] = {
     pg.K_LEFT: (-1, 0),
     pg.K_RIGHT: (1, 0),
     pg.K_UP: (0, -1),
     pg.K_DOWN: (0, 1),
+    pg.K_a: (-1, 0),
+    pg.K_d: (1, 0),
+    pg.K_w: (0, -1),
+    pg.K_s: (0, 1),
 }
 
 # appeler get_seed
 
 
 class Scene:
-    def __init__(self, screen_size: tuple[int, int], scale: float = 1.0) -> None:
+    def __init__(
+        self, screen_size: tuple[int, int], state: str, scale: float = 1.0
+    ) -> None:
         # Elements of the game
-        self.tile: float = 50.0
+        self.state: str = state
+        self.tile: int = int(50 * scale)
         grid_size: tuple[int, int] = (15, 30)
         self.mode: str = "PROD"
+        self.score: score = score("src/score.jsonc")
+        self.round: int = 5
+        self.input: list[tuple[int, int]] = []
+        self.chicken_actions: dict[str, Callable[[], None]] = {
+            "END": self.back_chicken_coop,
+            "SAFE": self.chill,
+            "PIG": self.on_mud,
+            "ROAD": self.on_road,
+        }
+        self.last_chunk_type: str = "SAFE"
+
+        # Rendering Object
         self.FLAT: Projection = Projection.flat(self.tile * scale)
         self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, self.tile * scale)
         self.proj: Projection = self.DEFO
-        # self.prep_world()
-        self.grid: Grid = Grid(grid_size, self.tile, scale)
         self.cam: Camera = Camera(screen_size)
+
+        # Prepare the world
+        self.grid: Grid = Grid(grid_size, self.tile, scale)
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(grid_size[0] / 2), 1, scale)
         self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
+        self.pig: Pig = Pig(round(col - 10), round(row), scale)
+
+        # Test
         self.grid.grid[18] += self.haybale
-        self.grid.grid[28] += self.chicken
+        self.grid.grid[1] += self.chicken
+        self.respawn_chicken()
+        self.grid.grid[13] += self.pig
+
+        # Test type
+        self.grid.grid[18].type = "ROAD"
+        self.grid.grid[29].type = "SAFE"
+        self.grid.grid[13].type = "PIG"
+
+    @property
+    def tile_size(self) -> tuple[int, int]:
+        return self.tile, self.tile
+
+    def prep_world(self):
+        # gw.generate_world()
+        # gw.generate_entity()
+        pass
 
     def update(self, dt: float):
         self.grid.update(dt)
         if self.chicken.is_alive:
-            self.update_chicken_chunk()
-            self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
+            self.chicken_update(dt)
 
     def handle_events(self, event: pg.Event) -> bool:
         if event.type == pg.KEYDOWN:
-            if event.key in MOVES:
-                self.chicken.move(*MOVES[event.key])
+            if event.key in MOVES and len(self.input) <= 1:
+                self.input.append(MOVES[event.key])
             if event.key == pg.K_p:
                 if self.proj == self.DEFO:
                     self.proj = self.FLAT
@@ -78,29 +120,82 @@ class Scene:
         elif last_row != new_row:
             self.grid.grid[last_row] -= self.chicken
             self.grid.grid[new_row] += self.chicken
+            self.last_chunk_type = self.grid.grid[last_row].type
 
-    def get_chicken_chunk(self) -> Chunk | int:
-        chunk = -1
+    def get_chicken_chunk(self) -> Chunk | None:
+        chunk = None
         if self.chicken.is_alive:
-            chunk = self.grid.grid.get(int(self.chicken.row), -1)
+            chunk = self.grid.grid.get(int(self.chicken.row))
             if isinstance(chunk, Chunk) and self.chicken in chunk:
                 return chunk
-        return -1
+        return chunk
 
-    def chicken_is_collide(self, is_center: bool = False) -> bool:
+    def chicken_is_collide(
+        self, chunk: Chunk, is_center: bool = False
+    ) -> tuple[bool, Entity | None]:
         """Return if the chicken is collide with a entity | if the center of the chicken_lr is on a entity"""
-        chunk = self.get_chicken_chunk()
-        tile = (self.tile, self.tile)
-        if isinstance(chunk, Chunk):
-            chicken_rect = self.chicken.resize_lr(tile)
-            for e in chunk:
-                entity_rect = e.resize_lr(tile)
-                if not isinstance(e, Chicken) and chicken_rect.colliderect(entity_rect):
-                    if is_center:
-                        return entity_rect.collidepoint(chicken_rect.center)
-                    return True
-        return False
+        chicken_rect = self.chicken.resize_lr(self.tile_size)
+        for e in chunk:
+            entity_rect = e.resize_lr(self.tile_size)
+            if e != self.chicken and chicken_rect.colliderect(entity_rect):
+                if is_center:
+                    return (entity_rect.collidepoint(chicken_rect.center), e)
+                return (True, e)
+        return (False, None)
 
-    def prep_world(self):
-        gw.generate_world()
-        gw.generate_entity()
+    def chicken_update(self, dt: float):
+        if self.input:
+            self.chicken.move(*self.input.pop(0))
+            self.update_chicken_chunk()
+        chunk = self.get_chicken_chunk()
+        if chunk:
+            _ = self.chicken_actions.get(chunk.type, self.chill)(chunk)
+        self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
+
+    def respawn_chicken(self):
+        self.score.next_round()
+        self.chicken.is_movable = False
+        self.chicken.row = len(self.grid.grid) - 1
+        self.chicken.col = len(self.grid.grid[0].tiles) // 2
+        self.update_chicken_chunk()
+
+    def snap_chicken(self, e: Entity | float, not_pos: bool = True):
+        if not_pos:
+            for entity in e.pieces():
+                er = entity.resize_lr(self.tile_size)
+                cr = self.chicken.resize_lr(self.tile_size)
+                if er.collidepoint(cr.center):
+                    self.chicken.col = entity.col
+        else:
+            self.chicken.col = e
+
+    def nearest_tile(self, chunk: Chunk) -> int:
+        for c, r in chunk.tiles:
+            rect_tile = pg.Rect(c * self.tile, r * self.tile, *self.tile_size)
+            cr = self.chicken.resize_lr(self.tile_size)
+            if rect_tile.collidepoint(cr.center):
+                return c
+        return self.chicken.col
+
+    def back_chicken_coop(self, chunk: Chunk):
+        if chunk.type == "END" and self.chicken_is_collide(chunk, True):
+            self.score.update("CHICKEN_SAVE")
+        self.respawn_chicken()
+
+    def chill(self, chunk: Chunk):
+        if self.last_chunk_type == "PIG":
+            self.chicken.is_movable = False
+            self.snap_chicken(self.nearest_tile(chunk), False)
+
+    def on_mud(self, chunk: Chunk):
+        is_collide, e = self.chicken_is_collide(chunk, True)
+        if chunk.type == "PIG" and is_collide:
+            self.chicken.is_movable = True
+            self.snap_chicken(e)
+        else:
+            self.respawn_chicken()
+
+    def on_road(self, chunk: Chunk):
+        is_collide, e = self.chicken_is_collide(chunk)
+        if is_collide:
+            self.respawn_chicken()

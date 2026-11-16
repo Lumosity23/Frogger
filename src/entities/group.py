@@ -15,6 +15,7 @@ class EntityGroup(Entity):
                 self.scale,
                 img=self.img,
                 is_alive=self.is_alive,
+                lift_val=self.lift_val,
             )
             for j in range(rows)
             for i in range(cols)

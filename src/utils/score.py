@@ -20,12 +20,12 @@ TABLE: dict[str, int] = {
 @dataclass
 class score:
     path_file: str
-    rounds: list[int] = []
-    current_score: int = 0
-    load_scores: dict[int, dict[str, Any]] = {}
-    leaderboard: list[int] = []
 
     def __post_init__(self):
+        self.rounds: list[int] = []
+        self.current_score: int = 0
+        self.load_scores: dict[int, dict[str, Any]] = {}
+        self.leaderboard: list[int] = []
         with open(self.path_file) as f:
             self.load_scores = json.load(f)
         self.leaderboard = sorted([score for score in self.load_scores])
@@ -68,6 +68,6 @@ class score:
 
         return leaderboard
 
-    def update(self, action: str, iteration: int):
+    def update(self, action: str, iteration: int = 1):
         """Add a score action with times ( iteration )"""
         self.current_score += TABLE.get(action, 0) * iteration
