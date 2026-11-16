@@ -18,27 +18,11 @@ class Grid:
         self.tile: float = tile
         self.cell_size: int = int(tile * scale)
         self.grid: dict[int, Chunk] = self.make_grid()
-        self.tiles: list[list[tuple[float, float]]] = self.make_tiles(
-            self.col, self.row
-        )
-
-    def make_tiles(self, col: float, row: float) -> list[list[tuple[float, float]]]:
-        """Make a grid of tuple[col, row]
-        ```python
-        [
-            [ tuple(0,0), tuple(1,0), tuple(2,0) ],
-            [ tuple(0,1), tuple(1,1), tuple(2,1) ],
-            [ tuple(0,2), tuple(1,2), tuple(2,2) ],
-        ]
-        ```
-        where each tuple is a position of a tile --> tuple[col, row]
-        """
-        return [[(x, y) for x in range(int(col))] for y in range(int(row))]
 
     def make_grid(self) -> dict[int, Chunk]:
         grid: dict[int, Chunk] = {}
         for i in range(self.row):
-            grid[i] = Chunk(i)
+            grid[i] = Chunk(i, self.col)
         return grid
 
     # Ceci est une methode temporaire en attendant le systeme de chunk
@@ -48,13 +32,17 @@ class Grid:
         rows = [proj.unproject(*corner)[1] for corner in corners]
 
         min_row = max(0, floor(min(rows)))
-        max_row = min(len(self.tiles), ceil(max(rows)))
+        max_row = min(self.row, ceil(max(rows)))
 
         return min_row, max_row
 
     def get_visible_tiles(self, rect: Rect, proj: Projection):
         minr, maxr = self.get_visible_rows(rect, proj)
-        return [entity for row in self.tiles[minr:maxr] for entity in row]
+        tiles: list[tuple[str, list[tuple[int, int]]]] = []
+        for row in range(minr, maxr):
+            c = self.grid[row]
+            tiles.append((c.type, c.tiles))
+        return tiles
 
     def get_visible_entities(self, rect: Rect, proj: Projection) -> list[Entity]:
         minr, maxr = self.get_visible_rows(rect, proj)

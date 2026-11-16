@@ -37,8 +37,9 @@ class Entity:
 
     def resize_lr(self, point: tuple[float, float]) -> pg.Rect:
         """Resize the logic rect with a Point"""
-        size = self.lsize[0] * point[0], self.lsize[1] * point[1]
-        return pg.Rect(self.col, self.row, *size)
+        x, y = point
+        size = self.lsize[0] * x, self.lsize[1] * y
+        return pg.Rect(self.col * x, self.row * y, *size)
 
     def pieces(self) -> list["Entity"]:
         """Ce qui est dessiné pour cette entité (surchargé par les groupes)"""

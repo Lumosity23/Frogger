@@ -2,6 +2,7 @@ import pygame as pg
 
 from src.scene import Scene
 from src.ui.pixelUI import PixelUI
+from src.ui.windows.menu import MenuWindow
 from src.utils import log
 
 
@@ -25,23 +26,22 @@ class App:
         # Other utils properties
         self.running: bool = False
         self.scale: float = scale
+        self.state: str = "MENU"
 
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
-        self.scene: Scene = Scene(self.screen_size, self.scale)
-        self.pixel: PixelUI = PixelUI(self.screen)
-        rs: pg.Rect = self.screen.get_rect()  # rect_screen
-        self.button_test = self.pixel.create_button(
-            pg.Rect(rs.centerx - 100, rs.h - 150, 200, 100), (255, 178, 102), "PLAY"
-        )
+        self.scene: Scene = Scene(self.screen_size, self.state, self.scale)
+        self.pixel: PixelUI = PixelUI(self.screen, self.state)
+        self.pixel.add_window(MenuWindow(self.pixel))
+        # self.pixel.open("MENU")
         self.running = True
-        log.debug("Game is INIT !")
+        log.debug("App is INIT !")
 
     def on_update(self, dt: float) -> None:
         """Update the Game"""
         self.scene.update(dt)
-        self.pixel.manager.update(dt)
+        self.pixel.update(dt)
 
     def on_draw(self, screen: pg.Surface) -> None:
         # Clean the buffer
@@ -49,7 +49,7 @@ class App:
 
         # Draw on screen
         self.scene.draw(screen)
-        self.pixel.manager.draw_ui(screen)
+        self.pixel.draw(screen)
 
         # Render on the screen
         pg.display.flip()
@@ -61,9 +61,9 @@ class App:
             if event.type == pg.QUIT:
                 pg.quit()
                 self.running = False
-                log.info("Game is stoped")
+                log.info("App is stoped")
                 return False
-            if not self.pixel.manager.process_events(event):
+            if not self.pixel.handle_event(event):
                 _ = self.scene.handle_events(event)
 
         return True

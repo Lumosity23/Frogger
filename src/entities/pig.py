@@ -15,7 +15,7 @@ class Pig(EntityGroup):
         self.is_alive = True
         self.lsize = (3, 1)
         self.imgs = self.get_anim(6, PATH, scale)
-        self.lift_val = -15.0
+        self.lift_val = -20.0
 
     @property
     @override

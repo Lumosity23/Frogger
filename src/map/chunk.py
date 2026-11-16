@@ -6,6 +6,7 @@ from src.entities.entity import Entity
 @dataclass
 class Chunk:
     row: int
+    col: int
     velocity: float = 1.0
     direction: int = 1
     type: str = "SAFE"
@@ -16,6 +17,7 @@ class Chunk:
 
     def __post_init__(self):
         self.entities: list[Entity] = []
+        self.tiles: list[tuple[int, int]] = [(c, self.row) for c in range(self.col)]
 
     def update(self, dt: float):
         step: float = dt * self.velocity * self.direction

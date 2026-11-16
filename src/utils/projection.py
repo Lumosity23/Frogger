@@ -50,7 +50,7 @@ class Projection:
         _, sy = self.cell_center(col, row)
         return sy
 
-    def tile_corners(self, col: int, row: int) -> list[tuple[float, float]]:
+    def tile_corners(self, col: float, row: float) -> list[tuple[float, float]]:
         """return the 4 screen_point of a tile ( top / right / bottom / left )"""
         return [
             self.project(col, row),

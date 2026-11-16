@@ -5,7 +5,7 @@ import pygame as pg
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))
 ASSETS = os.path.join(ROOT_PROJECT, "assets")
-RESOLUTION = 6  # 4 px ecran = 1 px image
+RESOLUTION = 4  # 4 px ecran = 1 px image
 
 FONT_PATH = os.path.join(ASSETS, "font", "PublicPixel.ttf")  # .ttf, pas .woff
 FONT_SIZE = 16
@@ -123,7 +123,7 @@ def draw_content(bs: pg.Surface, content: pg.Surface, dy: int = 0) -> None:
     if visible.w == 0 or visible.h == 0:
         return
 
-    dst = pg.Rect(0, 0, visible.w, visible.h)
+    dst = pg.Rect(0, 0, visible.w, visible.h + 10)
     dst.center = bs.get_rect().center
     dst.y += dy // 2
 

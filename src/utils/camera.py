@@ -23,4 +23,6 @@ class Camera:
     def to_view(
         self, points: Sequence[tuple[float, float]]
     ) -> list[tuple[float, float]]:
-        return [(x - self.offset.x, y - self.offset.y) for x, y in points]
+        return [
+            (round(x - self.offset.x), round(y - self.offset.y)) for x, y in points
+        ]
