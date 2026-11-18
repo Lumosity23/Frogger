@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 import pygame as pg
+import numpy as np
 
 # import src.map.generate_world as gw
 from src.entities.chicken import Chicken
@@ -49,6 +50,7 @@ class Scene:
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
+        self.rng = np.random.default_rng(get_seed()) # Est-ce correct ? OUI OMG ça fonctionne #émue -> pas bon endroit pour rng ??
 
         # Rendering Object
         self.FLAT: Projection = Projection.flat(self.tile * scale)
@@ -199,3 +201,9 @@ class Scene:
         is_collide, e = self.chicken_is_collide(chunk)
         if is_collide:
             self.respawn_chicken()
+
+def get_seed() -> int:
+    seed: str = ""
+    numbers = np.random.default_rng().integers(1, 10, 5)
+    for n in numbers: seed += str(n)
+    return int(seed)

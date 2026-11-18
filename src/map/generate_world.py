@@ -57,12 +57,12 @@ def get_chunk_type(Scene, chunk_type) -> list[dict[str, int]]:
 
 #str(rng.choice(chunk_type))
 # section = block + chunk SAFE
-# block = seed type chunk + seed nb lignes
+# block = rng type chunk + seed nb lignes
 
 
-def generate_world(chunk_type, seed) -> tuple[int, list[list[Chunk]]] :
-    """initiate chunk with type and return with seed"""
-    first = np.random.default_rng(seed).integers(0, 1, grid_size)
+def generate_world(chunk_type, Scene) -> tuple[int, list[list[Chunk]]] :
+    """initiate chunk with type and return (with seed)"""
+    first = np.random.default_rng(Scene.rng).integers(0, 1, Scene.grid_size)
 
 
 
