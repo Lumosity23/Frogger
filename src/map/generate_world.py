@@ -34,6 +34,7 @@ def generate_entity(entity_set, scale)-> list[list[Entity]]:
     for entity_type in entity_set:
         list_entities :list = []
         for _ in range(entity_set[entity_type].value):
+            np.random.default_rng(Scene.rng).integers(1, 5, 1)
             list_entities.append(entity_type(0, 0, scale))
         world.append(list_entities)
     return world        
@@ -48,7 +49,7 @@ def get_chunk_type(Scene, chunk_type) -> list[dict[str, int]]:
         if rows + 3 >= max_rows:
             return map
         else:
-            block = [rng.choice(chunk_type), rng.choice(rows)]
+            block = [Scene.rng.choice(chunk_type), Scene.rng.choice(rows)]
         rows -= rows - ussed_row
         #section + chunk SAFE ???
         map.append(section)
