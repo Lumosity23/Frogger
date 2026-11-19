@@ -243,8 +243,8 @@ Ce n'est pas obligé de garder ces noms de fonctions : si tu vois une meilleure 
 
 Avance dans cet ordre, et **teste après chaque étape** (un simple `print` du résultat suffit au début).
 
-- [ ] **1.** `generate_entity()` : le pool se crée correctement (bon nombre d'entités par type).
-- [ ] **2.** `get_seed()` + création du `rng` : la même seed redonne la même suite de nombres.
+- [x ] **1.** `generate_entity()` : le pool se crée correctement (bon nombre d'entités par type).
+- [x ] **2.** `get_seed()` + création du `rng` : la même seed redonne la même suite de nombres.
 - [ ] **3.** `plan_zones()` : affiche la liste de zones, vérifie les règles (début/fin SAFE, tampons).
 - [ ] **4.** `apply_zones()` : affiche le type de chacun des 30 chunks.
 - [ ] **5.** Distribution des entités dans les chunks, avec `logic_size`.

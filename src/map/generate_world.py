@@ -13,6 +13,7 @@ from src.entities.entity import Entity
 from src.entities.haybale import HayBale
 from src.entities.pig import Pig
 from src.map.chunk import Chunk
+from src.scene import Scene
 
 chunk_type: dict[str, tuple[int, bool]] = {
     "SAFE": (5, False),
@@ -32,13 +33,14 @@ def generate_entity(
     for entity_type in entity_set:
         list_entities: list[Entity] = []
         for _ in range(entity_set[entity_type].value):
+            _ = np.random.default_rng(Scene.rng).integers(1, 5, 1)  # A faire !
             list_entities.append(entity_type(0, 0, scale))
         world.append(list_entities)
     return world
 
 
-def get_chunk_type(Scene, chunk_type) -> list[dict[str, int]]:
-    max_rows: int = int(Scene.grid_size[1] - 2)
+def get_chunk_type(Scene: Scene, chunk_type: str) -> list[dict[str, int]]:
+    max_rows: int = Scene.grid_size[1] - 2
     rows: int = max_rows
     section: dict[str, int]
     map: list[dict[str, int]]
@@ -47,8 +49,8 @@ def get_chunk_type(Scene, chunk_type) -> list[dict[str, int]]:
         if rows + 3 >= max_rows:
             return map
         else:
-            block = [rng.choice(chunk_type), rng.choice(rows)]
-        rows -= rows - ussed_row
+            block = [Scene.rng.choice(chunk_type), Scene.rng.choice(rows)]
+        rows -= rows - used_row
         # section + chunk SAFE ???
         map.append(section)
 
@@ -57,12 +59,12 @@ def get_chunk_type(Scene, chunk_type) -> list[dict[str, int]]:
 
 # str(rng.choice(chunk_type))
 # section = block + chunk SAFE
-# block = seed type chunk + seed nb lignes
+# block = rng type chunk + seed nb lignes
 
 
-def generate_world(chunk_type, seed) -> tuple[int, list[list[Chunk]]]:
-    """initiate chunk with type and return with seed"""
-    first = np.random.default_rng(seed).integers(0, 1, grid_size)
+def generate_world(chunk_type, Scene) -> tuple[int, list[list[Chunk]]]:
+    """initiate chunk with type and return (with seed)"""
+    first = np.random.default_rng(Scene.rng).integers(0, 1, Scene.grid_size)
 
 
 # def entity_distribution(chunk_type):

@@ -15,7 +15,7 @@ class HayBale(EntityGroup):
         self.is_alive = True
         self.lsize = (4, 1)
         self.imgs = self.get_anim(8, PATH, scale)  # une frame = une case
-        self.lift_val = -15.0
+        self.lift_val = -10.0 * scale
 
     @property
     @override

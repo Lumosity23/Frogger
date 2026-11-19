@@ -1,5 +1,6 @@
 from collections.abc import Callable
 
+import numpy as np
 import pygame as pg
 
 # import src.map.generate_world as gw
@@ -49,10 +50,14 @@ class Scene:
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
+        self.rng = np.random.default_rng(
+            get_seed()
+        )  # Est-ce correct ? OUI OMG ça fonctionne #émue -> pas bon endroit pour rng ??
+        # Si si, c'est super ! on changera la place de plein de choses quand on aura la boucle de jeu complete
 
         # Rendering Object
-        self.FLAT: Projection = Projection.flat(self.tile * scale)
-        self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, self.tile * scale)
+        self.FLAT: Projection = Projection.flat(self.tile)
+        self.DEFO: Projection = Projection.deformation(1.1, 0.7, 15, self.tile)
         self.proj: Projection = self.DEFO
         self.cam: Camera = Camera(screen_size)
 
@@ -73,6 +78,7 @@ class Scene:
         self.grid.grid[18].type = "ROAD"
         self.grid.grid[29].type = "SAFE"
         self.grid.grid[13].type = "PIG"
+        self.grid.grid[0].type = "END"
 
     @property
     def tile_size(self) -> tuple[int, int]:
@@ -199,3 +205,11 @@ class Scene:
         is_collide, e = self.chicken_is_collide(chunk)
         if is_collide:
             self.respawn_chicken()
+
+
+def get_seed() -> int:
+    seed: str = ""
+    numbers = np.random.default_rng().integers(1, 10, 5)
+    for n in numbers:
+        seed += str(n)
+    return int(seed)
