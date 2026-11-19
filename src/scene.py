@@ -1,3 +1,4 @@
+import re
 from collections.abc import Callable
 
 import numpy as np
@@ -41,7 +42,9 @@ class Scene:
         grid_size: tuple[int, int] = (15, 30)
         self.mode: str = "PROD"
         self.score: score = score("src/score.jsonc")
-        self.round: int = 5
+        self.max_lives: int = 5
+        self.lives: int = self.max_lives
+        self.time: float = 60.0
         self.input: list[tuple[int, int]] = []
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
@@ -71,7 +74,7 @@ class Scene:
         # Test
         self.grid.grid[18] += self.haybale
         self.grid.grid[1] += self.chicken
-        self.respawn_chicken()
+        self.respawn_chicken(True)
         self.grid.grid[13] += self.pig
 
         # Test type
@@ -90,9 +93,12 @@ class Scene:
         pass
 
     def update(self, dt: float):
+        self.time -= dt
         self.grid.update(dt)
         if self.chicken.is_alive:
             self.chicken_update(dt)
+        else:
+            self.respawn_chicken()
 
     def handle_events(self, event: pg.Event) -> bool:
         if event.type == pg.KEYDOWN:
@@ -140,6 +146,8 @@ class Scene:
         self, chunk: Chunk, is_center: bool = False
     ) -> tuple[bool, Entity | None]:
         """Return if the chicken is collide with a entity | if the center of the chicken_lr is on a entity"""
+        if len(chunk) == 1:
+            return False, None
         chicken_rect = self.chicken.resize_lr(self.tile_size)
         for e in chunk:
             entity_rect = e.resize_lr(self.tile_size)
@@ -151,16 +159,20 @@ class Scene:
 
     def chicken_update(self, dt: float):
         if self.input:
-            self.chicken.move(*self.input.pop(0))
+            move = self.input.pop(0)
+            self.chicken.move(*move)
+            self.score.update("FOWARD", -move[1])
             self.update_chicken_chunk()
         chunk = self.get_chicken_chunk()
         if chunk:
             _ = self.chicken_actions.get(chunk.type, self.chill)(chunk)
         self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
 
-    def respawn_chicken(self):
+    def respawn_chicken(self, is_winning: bool = False):
         self.score.next_round()
+        self.lives -= 1 if not is_winning else 0
         self.chicken.is_movable = False
+        self.chicken.is_alive = True
         self.chicken.row = len(self.grid.grid) - 1
         self.chicken.col = len(self.grid.grid[0].tiles) // 2
         self.update_chicken_chunk()
@@ -184,9 +196,12 @@ class Scene:
         return self.chicken.col
 
     def back_chicken_coop(self, chunk: Chunk):
-        if chunk.type == "END" and self.chicken_is_collide(chunk, True):
+        is_collide, e = self.chicken_is_collide(chunk, True)
+        if chunk.type == "END" and is_collide:
             self.score.update("CHICKEN_SAVE")
-        self.respawn_chicken()
+            self.respawn_chicken(True)
+        else:
+            self.respawn_chicken()
 
     def chill(self, chunk: Chunk):
         if self.last_chunk_type == "PIG":

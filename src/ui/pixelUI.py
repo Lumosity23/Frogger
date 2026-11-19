@@ -183,15 +183,22 @@ class PixelUI:
         self.current = self.windows[name]
         self.current.show()
 
-    def handle_event(self, event: pg.Event) -> None:
-        self.manager.process_events(event)
+    def handle_event(self, event: pg.Event) -> bool:
+        consumed = bool(self.manager.process_events(event))
         if self.current is None:
-            return
+            return consumed
         next_name = self.current.handle_event(event)
         if next_name is not None:
-            self.open(next_name)
+            if next_name == "QUIT":
+                pg.event.post(pg.event.Event(pg.QUIT))
+            elif next_name in self.windows:
+                self.open(next_name)
+            return True
+        return consumed
 
     def update(self, dt: float) -> None:
+        if self.current is not None:
+            self.current.update(dt)
         self.manager.update(dt)
 
     def draw(self, screen: pg.Surface) -> None:

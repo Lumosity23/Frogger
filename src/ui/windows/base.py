@@ -37,3 +37,7 @@ class Window:
     def handle_event(self, event: pg.Event) -> str | None:
         """Override. Return the next window's name, or None."""
         return None
+
+    def update(self, dt: float) -> None:
+        """Override: update dynamic elements (called every frame)."""
+

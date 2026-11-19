@@ -2,6 +2,7 @@ import pygame as pg
 
 from src.scene import Scene
 from src.ui.pixelUI import PixelUI
+from src.ui.windows.hud import HudWindow
 from src.ui.windows.menu import MenuWindow
 from src.utils import log
 
@@ -34,7 +35,10 @@ class App:
         self.scene: Scene = Scene(self.screen_size, self.state, self.scale)
         self.pixel: PixelUI = PixelUI(self.screen, self.state)
         self.pixel.add_window(MenuWindow(self.pixel))
-        # self.pixel.open("MENU")
+        self.hud: HudWindow = HudWindow(self.pixel, scene=self.scene, scale=self.scale)
+        self.pixel.add_window(self.hud)
+        self.pixel.windows["GAME"] = self.hud
+        self.pixel.open("MENU")
         self.running = True
         log.debug("App is INIT !")
 
