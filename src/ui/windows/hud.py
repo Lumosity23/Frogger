@@ -1,4 +1,5 @@
 import pygame as pg
+from pygame.math import Vector2
 
 from src.ui.windows.base import Window
 
@@ -10,6 +11,7 @@ from src.ui.windows.base import Window
 DEFAULT_SCALE: float = 1.0  # Échelle globale du HUD
 DEFAULT_SCORE_SCALE: float = 3.0  # Échelle spécifique des chiffres du score
 DEFAULT_TIME_SCALE: float = 2.0  # Échelle spécifique des chiffres du temps
+DEFAULT_CLOCK_SCALE: float = 2.0
 DEFAULT_LIVES_SCALE: float = 3.0  # Échelle spécifique des crêtes de vie (comb.png)
 DEFAULT_LIVES_SPACING: int = 4  # Espace en pixels entre chaque crête séparée
 DEFAULT_MARGIN: int = 20  # Marge en pixels depuis les bords de l'écran
@@ -18,6 +20,7 @@ DIGITS_PATH = "assets/big_digits.png"
 TIME_DIGITS_PATH = "assets/tiny_digits.png"
 COMB_PATH = "assets/comb.png"
 DEAD_COMB_PATH = "assets/dead_comb.png"
+CLOCK_PATH = "assets/assets_logo/clock.png"
 
 
 def slice_spritesheet(path: str, n: int, scale: float = 1.0) -> dict[int, pg.Surface]:
@@ -55,6 +58,7 @@ class HudWindow(Window):
         scale: float = DEFAULT_SCALE,
         score_scale: float | None = None,
         time_scale: float | None = None,
+        clock_scale: float | None = None,
         lives_scale: float | None = None,
         lives_spacing: int = DEFAULT_LIVES_SPACING,
         margin: int = DEFAULT_MARGIN,
@@ -62,8 +66,9 @@ class HudWindow(Window):
         time_digit_path: str | None = TIME_DIGITS_PATH,
         comb_path: str = COMB_PATH,
         dead_comb_path: str = DEAD_COMB_PATH,
+        clock_path: str = CLOCK_PATH,
         max_lives: int = 5,
-        time_format: str = "MM:SS",
+        time_format: str = "SS",
     ) -> None:
         self.scene = scene
         self.scale = scale
@@ -73,6 +78,9 @@ class HudWindow(Window):
         ) * scale
         self.time_scale: float = (
             time_scale if time_scale is not None else DEFAULT_TIME_SCALE
+        ) * scale
+        self.clock_scale: float = (
+            clock_scale if clock_scale is not None else DEFAULT_CLOCK_SCALE
         ) * scale
         self.lives_scale: float = (
             lives_scale if lives_scale is not None else DEFAULT_LIVES_SCALE
@@ -84,6 +92,7 @@ class HudWindow(Window):
         self.time_digit_path = time_digit_path or digit_path
         self.comb_path = comb_path
         self.dead_comb_path = dead_comb_path
+        self.clock_path = clock_path
         self.max_lives: int = max_lives
         self.time_format: str = time_format
 
@@ -111,6 +120,9 @@ class HudWindow(Window):
         self.time_digits = slice_spritesheet(self.time_digit_path, 10, self.time_scale)
         time_digit_h = self.time_digits[0].get_height()
         self.time_colon = self._create_colon_surface(time_digit_h, self.time_scale)
+        self.clock = pg.image.load(self.clock_path).convert_alpha()
+        clock_w, clock_h = Vector2(self.clock.get_size()) * self.clock_scale
+        self.clock = pg.transform.scale(self.clock, (clock_w, clock_h))
 
         # 3. Crêtes de vie (actives et mortes) avec lives_scale
         comb_raw = pg.image.load(self.comb_path).convert_alpha()
@@ -131,6 +143,12 @@ class HudWindow(Window):
             f"HUD_TIME_{self.name}",
             dummy,
             pg.Rect(self.margin, self.margin, 1, 1),
+            container=self.panel,
+        )
+        self.clock_img = self.pixel.image(
+            f"HUD_CLOCK_{self.name}",
+            self.clock,
+            pg.Rect(self.margin - 10, self.margin - 4, clock_w, clock_h),
             container=self.panel,
         )
         self.score_img = self.pixel.image(
@@ -281,7 +299,9 @@ class HudWindow(Window):
             w, h = t_surf.get_size()
             self.time_img.set_image(t_surf)
             self.time_img.set_dimensions((w, h))
-            self.time_img.set_relative_position((self.margin, self.margin))
+            self.time_img.set_relative_position(
+                (self.margin + self.clock.width, self.margin)
+            )
 
         # 2. Score (en haut à droite)
         if self.score_val != self._last_score:

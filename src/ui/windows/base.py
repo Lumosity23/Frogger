@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame_gui as ui
 
 
 class Window:
@@ -40,4 +39,3 @@ class Window:
 
     def update(self, dt: float) -> None:
         """Override: update dynamic elements (called every frame)."""
-

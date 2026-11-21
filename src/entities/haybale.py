@@ -14,7 +14,12 @@ class HayBale(EntityGroup):
         self.duration = 0.7
         self.is_alive = True
         self.lsize = (4, 1)
-        self.imgs = self.get_anim(8, PATH, scale)  # une frame = une case
+        self.animations = {
+            1: self.get_anim(8, PATH, scale),
+            -1: self.get_anim(8, PATH, scale, True),
+        }
+        self.imgs = self.animations[1].copy()  # une frame = une case
+        self.img = self.imgs[0]
         self.lift_val = -10.0 * scale
 
     @property

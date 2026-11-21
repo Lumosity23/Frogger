@@ -27,6 +27,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     frog = App(
-        600, 1000, "Test de la boucle de base", scale=args.scale
+        600, 1000, "CHICKKER", scale=args.scale
     )  # Resolution de telephone comme pour un crossy road
     frog.run()

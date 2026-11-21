@@ -1,9 +1,13 @@
 import pygame as pg
 
 from src.scene import Scene
+from src.state import GameState, StateManager
 from src.ui.pixelUI import PixelUI
+from src.ui.windows.game_over import GameOverWindow
 from src.ui.windows.hud import HudWindow
+from src.ui.windows.leaderboard import LeaderboardWindow
 from src.ui.windows.menu import MenuWindow
+from src.ui.windows.pause import PauseWindow
 from src.utils import log
 
 
@@ -27,17 +31,19 @@ class App:
         # Other utils properties
         self.running: bool = False
         self.scale: float = scale
-        self.state: str = "MENU"
+        self.state_mgr = StateManager(GameState.MENU)
 
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
-        self.scene: Scene = Scene(self.screen_size, self.state, self.scale)
-        self.pixel: PixelUI = PixelUI(self.screen, self.state)
+        self.scene: Scene = Scene(self.screen_size, self.state_mgr, self.scale)
+        self.pixel: PixelUI = PixelUI(self.screen, self.state_mgr)
         self.pixel.add_window(MenuWindow(self.pixel))
         self.hud: HudWindow = HudWindow(self.pixel, scene=self.scene, scale=self.scale)
         self.pixel.add_window(self.hud)
-        self.pixel.windows["GAME"] = self.hud
+        self.pixel.add_window(PauseWindow(self.pixel))
+        self.pixel.add_window(GameOverWindow(self.pixel, scene=self.scene))
+        self.pixel.add_window(LeaderboardWindow(self.pixel, scene=self.scene))
         self.pixel.open("MENU")
         self.running = True
         log.debug("App is INIT !")
@@ -67,6 +73,18 @@ class App:
                 self.running = False
                 log.info("App is stoped")
                 return False
+
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                if self.state_mgr.current == GameState.PLAY:
+                    self.state_mgr.set(GameState.PAUSE)
+                    continue
+                elif self.state_mgr.current == GameState.PAUSE:
+                    self.state_mgr.set(GameState.PLAY)
+                    continue
+                elif self.state_mgr.current in (GameState.LEADERBOARD, GameState.GAME_OVER):
+                    self.state_mgr.set(GameState.MENU)
+                    continue
+
             if not self.pixel.handle_event(event):
                 _ = self.scene.handle_events(event)
 

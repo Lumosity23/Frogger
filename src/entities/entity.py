@@ -15,6 +15,7 @@ class Entity:
     clock: float = 0.0
     lift_val: float = 0.0
     lsize: tuple[float, float] = (1.0, 1.0)
+    direction: int = 1
 
     def __post_init__(self):
         self.last_pos: tuple[float, float] = self.col, self.row
@@ -49,12 +50,18 @@ class Entity:
         if getattr(self, "imgs", None) is not None:
             self.update_anim(dt)
 
-    def get_anim(self, n: int, path: str, scale: float) -> dict[int, pg.Surface]:
+    def get_anim(
+        self, n: int, path: str, scale: float, reverse: bool = False
+    ) -> dict[int, pg.Surface]:
         image = pg.image.load(path).convert_alpha()
         image = pg.transform.scale(image, pg.math.Vector2(image.get_size()) * scale)
         w = image.width // n
         h = image.height
-        return {x: image.subsurface(pg.Rect(x * w, 0, w, h)).copy() for x in range(n)}
+        d = image.width - w if reverse else 0
+        return {
+            x: image.subsurface(pg.Rect(abs(d - (x * w)), 0, w, h)).copy()
+            for x in range(n)
+        }
 
     def update_anim(self, dt: float):
         n: float = len(self.imgs)

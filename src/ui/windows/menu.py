@@ -15,6 +15,7 @@ import os
 import pygame as pg
 import pygame_gui as ui
 
+from src.state import GameState
 from src.ui.windows.base import Window
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -156,12 +157,12 @@ class MenuWindow(Window):
     def handle_event(self, event: pg.Event) -> str | None:
         if event.type == ui.UI_BUTTON_PRESSED:
             if event.ui_element is self.play_btn:
-                return "HUD"
+                self.pixel.state_mgr.set(GameState.PLAY)
             if event.ui_element is self.leaderboard_btn:
-                return "LEADERBOARD"
+                self.pixel.state_mgr.set(GameState.LEADERBOARD)
             if event.ui_element is self.quit_btn:
                 return "QUIT"
         elif event.type == pg.KEYDOWN and event.key in MOVES:
             _ = pg.event.post(event)
-            return "HUD"
+            self.pixel.state_mgr.set(GameState.PLAY)
         return None

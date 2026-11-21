@@ -1,6 +1,7 @@
 import pygame as pg
 
 from src.entities.entity import Entity
+from src.utils import log
 from src.utils.camera import Camera
 from src.utils.projection import Projection
 

@@ -11,6 +11,7 @@ from src.entities.pig import Pig
 from src.map.chunk import Chunk
 from src.map.grid import Grid
 from src.render import *
+from src.state import GameState, StateManager
 from src.utils import log
 from src.utils.camera import Camera
 
@@ -34,17 +35,17 @@ MOVES: dict[int, tuple[int, int]] = {
 
 class Scene:
     def __init__(
-        self, screen_size: tuple[int, int], state: str, scale: float = 1.0
+        self, screen_size: tuple[int, int], state_mgr: StateManager, scale: float = 1.0
     ) -> None:
         # Elements of the game
-        self.state: str = state
+        self.state_mgr: StateManager = state_mgr
         self.tile: int = int(50 * scale)
         grid_size: tuple[int, int] = (15, 30)
         self.mode: str = "PROD"
         self.score: score = score("src/score.jsonc")
         self.max_lives: int = 5
         self.lives: int = self.max_lives
-        self.time: float = 60.0
+        self.time: float = 12.0
         self.input: list[tuple[int, int]] = []
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
@@ -71,6 +72,9 @@ class Scene:
         self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
         self.pig: Pig = Pig(round(col - 10), round(row), scale)
 
+        # Subscribtion
+        self.state_mgr.subscribe(self.on_state_change)
+
         # Test
         self.grid.grid[18] += self.haybale
         self.grid.grid[1] += self.chicken
@@ -87,14 +91,33 @@ class Scene:
     def tile_size(self) -> tuple[int, int]:
         return self.tile, self.tile
 
+    def reset_game(self) -> None:
+        self.lives = self.max_lives
+        self.time = 12.0
+        self.score = score("src/score.jsonc")
+        self.chicken.is_alive = True
+        self.respawn_chicken(True)
+
+    def on_state_change(self, new_state: GameState, old_state: GameState) -> None:
+        if new_state == GameState.PLAY and old_state in (
+            GameState.MENU,
+            GameState.GAME_OVER,
+        ):
+            self.reset_game()
+
     def prep_world(self):
         # gw.generate_world()
         # gw.generate_entity()
         pass
 
     def update(self, dt: float):
-        self.time -= dt
+        if self.state_mgr.current != GameState.PLAY:
+            return
         self.grid.update(dt)
+        if self.time <= 0 or self.lives <= 0:
+            self.state_mgr.set(GameState.GAME_OVER)
+            return
+        self.time -= dt
         if self.chicken.is_alive:
             self.chicken_update(dt)
         else:
@@ -121,6 +144,13 @@ class Scene:
         all_entities = self.grid.get_visible_entities(self.cam.visible_rect, self.proj)
         draw_grid(screen, visible_tiles, self.proj, self.cam)
         draw_entities(screen, all_entities, self.proj, self.cam, self.tile, self.mode)
+
+    def is_game_over(self) -> bool:
+        return (
+            self.state_mgr.current != GameState.PLAY
+            or self.time <= 0
+            or self.lives <= 0
+        )
 
     def update_chicken_chunk(self):
         last_row = int(self.chicken.last_pos[1])

@@ -70,6 +70,9 @@ class Chunk:
 
     def __iadd__(self, entity: Entity) -> Chunk:  # chunk += entity
         entity.row = self.row
+        # entity.direction = self.direction
+        if hasattr(entity, "imgs"):
+            entity.imgs = entity.animations[self.direction].copy()
         entity.last_pos = entity.col, self.row
         self.entities.append(entity)
         return self  # c'est cette ligne qui manquais pour bien faire fonctionner __iadd__ ! OMG
