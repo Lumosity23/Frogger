@@ -52,10 +52,10 @@ class Chicken(Entity):
             for dir, img in zip(directions, self.get_anim(4, path, scale).values())
         }
 
-    def move(self, dcol: int, drow: int) -> None:
+    def move(self, dcol: int, drow: int) -> bool:
         """chicken's controls"""
         if not self.is_alive:
-            return
+            return False
         if not self.is_jumping:
             self.last_pos = (self.col, self.row)
             self.from_cell = self.last_pos
@@ -63,6 +63,8 @@ class Chicken(Entity):
             self.row += drow
             self.clock = 0.0
             self.img = self.face_dir[dcol, drow].copy()
+            return True
+        return False
 
     def update(self, dt: float) -> None:
         if self.is_jumping:

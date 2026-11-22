@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
 
 # Virtual environments
 .venv
@@ -19,10 +20,11 @@ wheels/
 # tmp file/folder
 /tmp
 
+
 # Ajout eventuel de Ju
 # ...
 
-# git pull 
+# git pull
 
 # git add . -> tout ajouter
 # git commit -m "mon message"

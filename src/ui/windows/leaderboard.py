@@ -20,13 +20,14 @@ import pygame_gui as ui
 from src.state import GameState
 from src.ui.digits import render_digits, slice_spritesheet
 from src.ui.windows.base import Window
+from src.utils import log
 from src.utils.score import score as ScoreManager
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_PROJECT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 ASSETS = os.path.join(ROOT_PROJECT, "assets")
 
-COLOR_HOME = (217, 87, 99)          # Soft light red
+COLOR_HOME = (217, 87, 99)  # Soft light red
 TINY_DIGITS_PATH = os.path.join(ASSETS, "tiny_digits.png")
 SCORE_FILE = os.path.join(ROOT_PROJECT, "src", "score.jsonc")
 
@@ -46,6 +47,48 @@ class LeaderboardWindow(Window):
         self.scene = scene
         self.row_images: list[ui.elements.UIImage] = []
         super().__init__(pixel)
+
+    def show(self) -> None:
+        super().show()
+        self.refresh()
+
+    def refresh(self) -> None:
+        board_data: dict[int, dict] = {}
+        try:
+            sm = ScoreManager(SCORE_FILE)
+            board_data = sm.get_leaderboard()
+        except Exception:
+            board_data = {}
+
+        # default_names = ["HEN_SOLO", "CLUCK_NORRIS", "EGG_HEAD", "ROOSTER", "NUGGET"]
+        # default_scores = [1500, 1200, 900, 600, 300]
+
+        screen_rect = pg.Rect((0, 0), self.pixel.manager.window_resolution)
+        scale_x = screen_rect.width / 600.0
+
+        for i in board_data:
+            entry = board_data.get(i)
+            name = entry.get("name")  # if entry else default_names[i - 1]
+            score_val = entry.get("score")  # if entry else default_scores[i - 1]
+
+            name_key = f"LEAD_NAME_{i}"
+            if name_key in self.pixel.images:
+                self.pixel.texts[name_key] = str(name)[:10]
+                name_surf = self.pixel.render_text(
+                    self.pixel.texts[name_key],
+                    size=int(16 * scale_x),
+                    color=(255, 255, 255),
+                    outline=(0, 0, 0),
+                    width=2,
+                )
+                self.pixel.images[name_key].set_image(name_surf)
+                self.pixel.images[name_key].set_dimensions(name_surf.get_size())
+
+            score_key = f"LEAD_SCORE_{i}"
+            if score_key in self.pixel.images:
+                score_surf = render_digits(score_val, self.digits, self.digit_scale)
+                self.pixel.images[score_key].set_image(score_surf)
+                self.pixel.images[score_key].set_dimensions(score_surf.get_size())
 
     def build(self) -> None:
         screen_rect = pg.Rect((0, 0), self.pixel.manager.window_resolution)
@@ -92,9 +135,15 @@ class LeaderboardWindow(Window):
 
         # 3. Load Medals
         medal_scale = max(1, int(round(2.5 * scale_x)))
-        self.gold_surf = pg.transform.scale_by(load_asset_img("gold_medal.png"), medal_scale)
-        self.silver_surf = pg.transform.scale_by(load_asset_img("argent_medal.png"), medal_scale)
-        self.bronze_surf = pg.transform.scale_by(load_asset_img("bronze_medal.png"), medal_scale)
+        self.gold_surf = pg.transform.scale_by(
+            load_asset_img("gold_medal.png"), medal_scale
+        )
+        self.silver_surf = pg.transform.scale_by(
+            load_asset_img("argent_medal.png"), medal_scale
+        )
+        self.bronze_surf = pg.transform.scale_by(
+            load_asset_img("bronze_medal.png"), medal_scale
+        )
 
         # 4. Digits
         self.digit_scale = max(1.0, 2.0 * scale_x)
@@ -123,12 +172,14 @@ class LeaderboardWindow(Window):
 
     def populate_scores(self, cx: int, cy: int, scale_x: float, scale_y: float) -> None:
         # Load scores
-        board_data: dict[int, dict] = {}
+        board_data: dict[int, dict[str, str]] = {}
         try:
-            sm = ScoreManager(SCORE_FILE)
+            sm: ScoreManager = self.scene.score
             board_data = sm.get_leaderboard()
-        except Exception:
+
+        except Exception as e:
             board_data = {}
+            log.debug(f"LB : soucis... | {e}")
 
         # Default fallbacks if empty
         default_names = ["HEN_SOLO", "CLUCK_NORRIS", "EGG_HEAD", "ROOSTER", "NUGGET"]
@@ -139,7 +190,7 @@ class LeaderboardWindow(Window):
         row_w = int(480 * scale_x)
         row_h = int(85 * scale_y)
 
-        for i in range(1, 6):
+        for i in board_data:
             ry = start_y + (i - 1) * row_gap
             rx = cx - row_w // 2
 
@@ -158,13 +209,19 @@ class LeaderboardWindow(Window):
             badge_y = ry + row_h // 2
             if i == 1:
                 b_rect = self.gold_surf.get_rect(center=(badge_x, badge_y))
-                self.pixel.image(f"LEAD_MEDAL_{i}", self.gold_surf, b_rect, container=self.panel)
+                self.pixel.image(
+                    f"LEAD_MEDAL_{i}", self.gold_surf, b_rect, container=self.panel
+                )
             elif i == 2:
                 b_rect = self.silver_surf.get_rect(center=(badge_x, badge_y))
-                self.pixel.image(f"LEAD_MEDAL_{i}", self.silver_surf, b_rect, container=self.panel)
+                self.pixel.image(
+                    f"LEAD_MEDAL_{i}", self.silver_surf, b_rect, container=self.panel
+                )
             elif i == 3:
                 b_rect = self.bronze_surf.get_rect(center=(badge_x, badge_y))
-                self.pixel.image(f"LEAD_MEDAL_{i}", self.bronze_surf, b_rect, container=self.panel)
+                self.pixel.image(
+                    f"LEAD_MEDAL_{i}", self.bronze_surf, b_rect, container=self.panel
+                )
             else:
                 self.pixel.texts[f"RANK_{i}"] = f"#{i}"
                 self.pixel.text_image(
@@ -194,8 +251,12 @@ class LeaderboardWindow(Window):
 
             # Score with tiny_digits
             score_surf = render_digits(score_val, self.digits, self.digit_scale)
-            score_rect = score_surf.get_rect(midright=(rx + row_w - int(25 * scale_x), badge_y))
-            self.pixel.image(f"LEAD_SCORE_{i}", score_surf, score_rect, container=self.panel)
+            score_rect = score_surf.get_rect(
+                midright=(rx + row_w - int(25 * scale_x), badge_y)
+            )
+            self.pixel.image(
+                f"LEAD_SCORE_{i}", score_surf, score_rect, container=self.panel
+            )
 
     def handle_event(self, event: pg.Event) -> str | None:
         if event.type == ui.UI_BUTTON_PRESSED:

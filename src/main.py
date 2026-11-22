@@ -31,19 +31,23 @@ class App:
         # Other utils properties
         self.running: bool = False
         self.scale: float = scale
-        self.state_mgr = StateManager(GameState.MENU)
 
         log.info("App is correctly INIT")
 
     def on_init(self) -> None:
+        # creation des manager
+        self.state_mgr = StateManager(GameState.MENU)
         self.scene: Scene = Scene(self.screen_size, self.state_mgr, self.scale)
         self.pixel: PixelUI = PixelUI(self.screen, self.state_mgr)
+
+        # Creation et ajout des fentre du jeu
         self.pixel.add_window(MenuWindow(self.pixel))
-        self.hud: HudWindow = HudWindow(self.pixel, scene=self.scene, scale=self.scale)
-        self.pixel.add_window(self.hud)
+        self.pixel.add_window(HudWindow(self.pixel, scene=self.scene, scale=self.scale))
         self.pixel.add_window(PauseWindow(self.pixel))
         self.pixel.add_window(GameOverWindow(self.pixel, scene=self.scene))
         self.pixel.add_window(LeaderboardWindow(self.pixel, scene=self.scene))
+
+        # Lancement du jeu
         self.pixel.open("MENU")
         self.running = True
         log.debug("App is INIT !")
@@ -81,7 +85,10 @@ class App:
                 elif self.state_mgr.current == GameState.PAUSE:
                     self.state_mgr.set(GameState.PLAY)
                     continue
-                elif self.state_mgr.current in (GameState.LEADERBOARD, GameState.GAME_OVER):
+                elif self.state_mgr.current in (
+                    GameState.LEADERBOARD,
+                    GameState.GAME_OVER,
+                ):
                     self.state_mgr.set(GameState.MENU)
                     continue
 

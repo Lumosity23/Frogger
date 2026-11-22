@@ -250,14 +250,7 @@ class HudWindow(Window):
         """Met à jour les données depuis Scene si elle est fournie, puis actualise le HUD."""
         if self.scene is not None:
             # Récupération du score
-            if hasattr(self.scene, "score"):
-                sc = self.scene.score
-                if hasattr(sc, "score") and hasattr(sc, "current_score"):
-                    self.score_val = sc.score + sc.current_score
-                elif hasattr(sc, "score"):
-                    self.score_val = sc.score
-                elif isinstance(sc, int):
-                    self.score_val = sc
+            self.score_val = f"{self.scene.score.score}"
 
             # Récupération des vies
             if hasattr(self.scene, "max_lives"):

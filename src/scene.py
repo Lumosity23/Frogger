@@ -39,13 +39,15 @@ class Scene:
     ) -> None:
         # Elements of the game
         self.state_mgr: StateManager = state_mgr
+        self.dead_state: str = "GAME OVER"
         self.tile: int = int(50 * scale)
-        grid_size: tuple[int, int] = (15, 30)
+        self.grid_size: tuple[int, int] = (15, 30)
         self.mode: str = "PROD"
         self.score: score = score("src/score.jsonc")
         self.max_lives: int = 5
         self.lives: int = self.max_lives
-        self.time: float = 12.0
+        self.timer: float = 20.0
+        self.time: float = self.timer
         self.input: list[tuple[int, int]] = []
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
@@ -54,8 +56,9 @@ class Scene:
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
+        self.seed: int = get_seed()
         self.rng = np.random.default_rng(
-            get_seed()
+            self.seed
         )  # Est-ce correct ? OUI OMG ça fonctionne #émue -> pas bon endroit pour rng ??
         # Si si, c'est super ! on changera la place de plein de choses quand on aura la boucle de jeu complete
 
@@ -66,9 +69,9 @@ class Scene:
         self.cam: Camera = Camera(screen_size)
 
         # Prepare the world
-        self.grid: Grid = Grid(grid_size, self.tile, scale)
+        self.grid: Grid = Grid(self.grid_size, self.tile, scale)
         col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
-        self.chicken: Chicken = Chicken(round(grid_size[0] / 2), 1, scale)
+        self.chicken: Chicken = Chicken(round(self.grid_size[0] / 2), 1, scale)
         self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
         self.pig: Pig = Pig(round(col - 10), round(row), scale)
 
@@ -94,6 +97,8 @@ class Scene:
     def reset_game(self) -> None:
         self.lives = self.max_lives
         self.time = 12.0
+        self.seed = get_seed()
+        self.rng = np.random.default_rng(self.seed)
         self.score = score("src/score.jsonc")
         self.chicken.is_alive = True
         self.respawn_chicken(True)
@@ -104,6 +109,10 @@ class Scene:
             GameState.GAME_OVER,
         ):
             self.reset_game()
+        elif new_state == GameState.GAME_OVER:
+            self.respawn_chicken()
+            self.lives = int(self.max_lives)
+            self.time = float(self.timer)
 
     def prep_world(self):
         # gw.generate_world()
@@ -111,21 +120,22 @@ class Scene:
         pass
 
     def update(self, dt: float):
-        if self.state_mgr.current != GameState.PLAY:
-            return
-        self.grid.update(dt)
-        if self.time <= 0 or self.lives <= 0:
+        if self.state_mgr.current != GameState.PAUSE:
+            self.grid.update(dt)
+            self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
+        if self.is_game_over():
             self.state_mgr.set(GameState.GAME_OVER)
             return
-        self.time -= dt
-        if self.chicken.is_alive:
-            self.chicken_update(dt)
-        else:
-            self.respawn_chicken()
+        if self.state_mgr.current == GameState.PLAY:
+            self.time -= dt
+            if self.chicken.is_alive:
+                self.chicken_update(dt)
+            else:
+                self.respawn_chicken()
 
     def handle_events(self, event: pg.Event) -> bool:
         if event.type == pg.KEYDOWN:
-            if event.key in MOVES and len(self.input) <= 1:
+            if event.key in MOVES and not self.input:
                 self.input.append(MOVES[event.key])
             if event.key == pg.K_p:
                 if self.proj == self.DEFO:
@@ -146,11 +156,18 @@ class Scene:
         draw_entities(screen, all_entities, self.proj, self.cam, self.tile, self.mode)
 
     def is_game_over(self) -> bool:
-        return (
-            self.state_mgr.current != GameState.PLAY
-            or self.time <= 0
-            or self.lives <= 0
-        )
+        time_left = self.time <= 0
+        lives_left = self.lives <= 0
+        state = time_left or lives_left
+        if state:
+            if lives_left:
+                self.dead_state = "No more lives !"
+            elif time_left:
+                self.dead_state = "No more time !"
+            return True
+        elif self.is_win():
+            self.dead_state = ""
+        return False
 
     def update_chicken_chunk(self):
         last_row = int(self.chicken.last_pos[1])
@@ -190,16 +207,18 @@ class Scene:
     def chicken_update(self, dt: float):
         if self.input:
             move = self.input.pop(0)
-            self.chicken.move(*move)
-            self.score.update("FOWARD", -move[1])
+            if self.chicken.move(*move):
+                self.score.update("FOWARD", -move[1])
+            else:
+                pass  # self.input.insert(0, move) # buffer for smoother input
             self.update_chicken_chunk()
         chunk = self.get_chicken_chunk()
         if chunk:
             _ = self.chicken_actions.get(chunk.type, self.chill)(chunk)
-        self.cam.follow(self.proj.cell_center(*self.chicken.gpos), dt)
 
     def respawn_chicken(self, is_winning: bool = False):
         self.score.next_round()
+        self.input.clear()
         self.lives -= 1 if not is_winning else 0
         self.chicken.is_movable = False
         self.chicken.is_alive = True
@@ -250,6 +269,18 @@ class Scene:
         is_collide, e = self.chicken_is_collide(chunk)
         if is_collide:
             self.respawn_chicken()
+
+    def is_win(self) -> bool:
+        """Check if all chicken coop is occupied ( Not a very reliable method... )"""
+        all_occupied = 0
+        end_chunk = self.grid.grid[0]
+        size = len(end_chunk)
+        if size <= 1:
+            return False
+        for e in end_chunk:
+            if hasattr(e, "occupied"):
+                all_occupied += 1
+        return all_occupied == (size - 1)
 
 
 def get_seed() -> int:

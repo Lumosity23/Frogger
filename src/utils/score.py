@@ -11,11 +11,12 @@ import tempfile
 from dataclasses import dataclass
 from typing import Any
 
-log = logging.getLogger(__name__)
+from src.utils import log
 
 MAX_SAVE = 5
 TABLE: dict[str, int] = {
     "FOWARD": 10,
+    "FORWARD": 10,
     "CHICKEN_SAVE": 50,
     "ALL_SAVE": 1000,
     "TIME_LEFT": 10,
@@ -31,72 +32,148 @@ class score:
         self.current_score: int = 0
         self.load_scores: dict[int, dict[str, Any]] = {}
         self.leaderboard: list[int] = []
-        with open(self.path_file) as f:
-            # JSON transforme les clés en str : on les reconvertit en int
-            self.load_scores = {int(k): v for k, v in json.load(f).items()}
-        self.leaderboard = sorted([score for score in self.load_scores])
+        self.saved: bool = False
+        self._load()
+
+    def _load(self) -> None:
+        """Charge les scores depuis le fichier JSON/JSONC."""
+        if not os.path.exists(self.path_file):
+            self.load_scores = {}
+            self.leaderboard = []
+            return
+        try:
+            with open(self.path_file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if not content:
+                    raw_data = {}
+                else:
+                    # Ignore les lignes de commentaires commençant par //
+                    lines = [
+                        line
+                        for line in content.splitlines()
+                        if not line.strip().startswith("//")
+                    ]
+                    raw_data = json.loads("\n".join(lines))
+            self.load_scores = {
+                int(k): v
+                for k, v in raw_data.items()
+                if str(k).isdigit() and isinstance(v, dict)
+            }
+            self.leaderboard = sorted(
+                [val["score"] for val in self.load_scores.values()]
+            )
+        except Exception as e:
+            log.error(f"Échec du chargement des scores depuis {self.path_file} : {e}")
+            self.load_scores = {}
+            self.leaderboard = []
 
     @property
     def score(self) -> int:
-        return sum(self.rounds)
+        """Score total accumulé (tous les rounds + round en cours)."""
+        return sum(self.rounds) + self.current_score
 
     @property
     def lowest_score(self) -> int:
-        return min(self.leaderboard)
+        """Score le plus bas du leaderboard actuel."""
+        return min(self.leaderboard) if self.leaderboard else 0
+
+    @property
+    def highest_score(self) -> int:
+        """Score le plus élevé du leaderboard actuel."""
+        return max(self.leaderboard) if self.leaderboard else 0
 
     @property
     def is_better(self) -> bool:
+        """Vérifie si le score actuel est éligible pour entrer dans le leaderboard (Top 5)."""
+        if self.score <= 0:
+            return False
+        if len(self.leaderboard) < MAX_SAVE:
+            return True
         return self.score > self.lowest_score
 
-    def _write_score(self):
+    @property
+    def is_high_score(self) -> bool:
+        """Vérifie si le score actuel bat le meilleur score (#1) du leaderboard."""
+        if self.score <= 0:
+            return False
+        if not self.leaderboard:
+            return True
+        return self.score > self.highest_score
+
+    def get_rank(self) -> int | None:
+        if not self.is_better:
+            return None
+        if self.is_high_score:
+            return 1
+
+        for i, score in enumerate(sorted(self.leaderboard, reverse=True)):
+            if self.score > score:
+                return MAX_SAVE - i
+
+    def _write_score(self) -> None:
+        """Écrit les scores de manière atomique."""
         directory = os.path.dirname(os.path.abspath(self.path_file))
+        os.makedirs(directory, exist_ok=True)
         try:
-            # Écriture dans un fichier temporaire puis remplacement atomique,
-            # pour ne jamais laisser un fichier de scores tronqué
             fd, tmp_path = tempfile.mkstemp(dir=directory, suffix=".tmp")
-            with os.fdopen(fd, "w") as f:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(self.load_scores, f, indent=2)
             os.replace(tmp_path, self.path_file)
-
         except (OSError, TypeError, ValueError) as e:
             log.error("Échec de l'écriture des scores dans %s : %s", self.path_file, e)
             if "tmp_path" in locals() and os.path.exists(tmp_path):
                 os.remove(tmp_path)
 
-    def _next_game(self):
+    def _next_game(self) -> None:
         self.rounds = []
         self.current_score = 0
+        self.saved = False
 
-    def next_round(self):
+    def next_round(self) -> None:
         self.rounds.append(self.current_score)
         self.current_score = 0
 
-    def save_score(self, name: str, seed: int):
+    def save_score(self, name: str = "PLAYER", seed: int = 0) -> bool:
+        """Enregistre le score dans le leaderboard s'il est éligible."""
+        if self.saved:
+            return False
+        if self.current_score > 0:
+            self.next_round()
         final = self.score
-        if len(self.leaderboard) <= MAX_SAVE or final > min(self.load_scores):
-            self.load_scores[final] = {"score": final, "name": name, "seed": seed}
-            best = sorted(self.load_scores, reverse=True)[:MAX_SAVE]
-            self.load_scores = {k: self.load_scores[k] for k in best}
-            self.leaderboard = sorted(self.load_scores)
+        if final <= 0:
+            return False
+
+        self._load()
+        can_save = (len(self.leaderboard) < MAX_SAVE) or (final > min(self.leaderboard))
+        if can_save:
+            clean_name = str(name).strip()[:10] or "PLAYER"
+            self.load_scores[self.get_rank()] = {
+                "score": final,
+                "name": clean_name,
+                "seed": seed,
+            }
+            best_keys = sorted(self.load_scores.keys(), reverse=True)[:MAX_SAVE]
+            self.load_scores = {k: self.load_scores[k] for k in best_keys}
+            self.leaderboard = sorted(self.load_scores.keys())
             self._write_score()
-        self._next_game()
+            self.saved = True
+            return True
+        return False
 
     def get_leaderboard(self) -> dict[int, dict[str, str]]:
         """
         Leaderboard --> :
             [int] : {
-            "score" : "1234"
-            "name"  : "Ju"
-            "seed"  : "12532"
+            "score" : 1234,
+            "name"  : "Ju",
+            "seed"  : 12532
             }
         """
-        leaderboard: dict[int, dict[str, Any]] = {}
-        # Le meilleur score est en place 1
-        for rank, key in enumerate(sorted(self.leaderboard, reverse=True), start=1):
-            leaderboard[rank] = self.load_scores[key]
+        # leaderboard: dict[int, dict[str, Any]] = {}
+        # for rank, key in enumerate(sorted(self.leaderboard, reverse=True), start=1):
+        #    leaderboard[rank] = self.load_scores[rank]
+        return self.load_scores.copy()  # leaderboard
 
-        return leaderboard
-
-    def update(self, action: str, iteration: int = 1):
+    def update(self, action: str, iteration: int = 1) -> None:
         """Add a score action with times ( iteration )"""
         self.current_score += TABLE.get(action, 0) * iteration

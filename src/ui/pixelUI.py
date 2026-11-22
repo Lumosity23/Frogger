@@ -4,6 +4,7 @@ import pygame_gui as ui
 from src.state import GameState, StateManager
 from src.ui import make_button as mb
 from src.ui.windows.base import Window
+from src.utils import log
 
 FONT_PATH = "assets/font/PublicPixel.ttf"
 
@@ -183,8 +184,8 @@ class PixelUI:
         if self.current is not None:
             self.current.hide()
         self.current = self.windows[name]
+        # log.debug(self.current.__class__.__name__)
         self.current.show()
-        self.state = name
 
     def on_state_change(self, new_state: GameState, old_state: GameState) -> None:
         # Ouvre la bonne fenêtre selon le nouvel état
