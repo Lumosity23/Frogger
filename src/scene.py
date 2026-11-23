@@ -30,6 +30,8 @@ MOVES: dict[int, tuple[int, int]] = {
     pg.K_s: (0, 1),
 }
 
+OG_MAP = True
+
 # appeler get_seed
 
 
@@ -84,11 +86,19 @@ class Scene:
         self.respawn_chicken(True)
         self.grid.grid[13] += self.pig
 
-        # Test type
-        self.grid.grid[18].type = "ROAD"
-        self.grid.grid[29].type = "SAFE"
-        self.grid.grid[13].type = "PIG"
-        self.grid.grid[0].type = "END"
+        # OG MAP
+        if OG_MAP:
+            self.grid.grid[29].type = "SAFE"
+            row = self.grid_size[1]
+            for i in range(row - 2, row // 2, -1):
+                self.grid.grid[i].type = "ROAD"
+            self.grid.grid[row // 2].type = "SAFE"
+            for i in range(row // 2 - 1, 0, -1):
+                self.grid.grid[i].type = "PIG"
+            self.grid.grid[0].type = "END"
+
+        else:
+            pass
 
     @property
     def tile_size(self) -> tuple[int, int]:
@@ -135,7 +145,7 @@ class Scene:
 
     def handle_events(self, event: pg.Event) -> bool:
         if event.type == pg.KEYDOWN:
-            if event.key in MOVES and not self.input:
+            if event.key in MOVES:
                 self.input.append(MOVES[event.key])
             if event.key == pg.K_p:
                 if self.proj == self.DEFO:
@@ -210,7 +220,7 @@ class Scene:
             if self.chicken.move(*move):
                 self.score.update("FOWARD", -move[1])
             else:
-                pass  # self.input.insert(0, move) # buffer for smoother input
+                self.input.insert(0, move)  # buffer for smoother input
             self.update_chicken_chunk()
         chunk = self.get_chicken_chunk()
         if chunk:

@@ -5,8 +5,7 @@ from pygame.rect import Rect
 
 from src.entities.entity import Entity
 from src.map.chunk import Chunk
-
-# from src.utils.log import debug
+from src.utils import log
 from src.utils.projection import Projection
 
 
@@ -30,11 +29,16 @@ class Grid:
         """Return the visible rows"""
         corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
         rows = [proj.unproject(*corner)[1] for corner in corners]
-
         min_row = max(0, floor(min(rows)))
         max_row = min(self.row, ceil(max(rows)))
 
         return min_row, max_row
+
+    def get_visible_cols(self, r: Rect, proj: Projection) -> tuple[int, int]:
+        """Return the visible cols"""
+        corners = [r.topleft, r.topright, r.bottomleft, r.bottomright]
+        cols = [proj.unproject(*corner)[0] for corner in corners]
+        return floor(max(cols)), ceil(min(cols))
 
     def get_visible_tiles(self, rect: Rect, proj: Projection):
         minr, maxr = self.get_visible_rows(rect, proj)
@@ -52,6 +56,9 @@ class Grid:
             for e in chunk:
                 all_entities.append(e)
         return all_entities
+
+    def add_decors(self):
+        pass
 
     # def type de monde -> dans generate_word.py
 

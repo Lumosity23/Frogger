@@ -14,6 +14,7 @@ CHUNK_TYPES: dict[str, tuple[tuple[int, int, int], tuple[int, int, int]]] = {
     "PIG": ((126, 85, 22), (126, 85, 22)),
     "END": ((120, 180, 90), (105, 165, 80)),
 }
+DANGER = {(255, 245, 0), (35, 35, 20)}
 
 
 def debug_rect(entity: Entity, pos: tuple[float, float], tile: float) -> pg.Rect:

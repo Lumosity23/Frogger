@@ -6,7 +6,7 @@ import pygame as pg
 
 from src.entities.entity import Entity
 
-HOP_TIME = 0.25  # durée d'un saut (s)
+HOP_TIME = 0.20  # durée d'un saut (s)
 HOP_HEIGHT = 17  # hauteur maximale du saut (px)
 
 ROOT = os.path.dirname(os.path.abspath(__name__))
