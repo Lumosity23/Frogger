@@ -39,7 +39,7 @@ def generate_entity(
         world.append(list_entities)
     return world
 
-def get_chunk_type(Scene: Scene, chunk_type: str) -> list[str]:
+def get_chunk_type(rng, chunk_type: str, gs) -> list[str]:
     """initiate chunk type and return in list (with seed)"""
     diffwei = [50, 90, 65, 50, 50, 20, 20, 10, 0] # Facteur pour augmenter les chances d'avoir plus 1 fois le même type de chunk
     n = 1
@@ -51,38 +51,38 @@ def get_chunk_type(Scene: Scene, chunk_type: str) -> list[str]:
     }
     world = ["END"] #liste commence avec le END de la fin, coordonné y depuis haut écran --> correct ?
 
-    while len(world) <= Scene.grid_size[1] - 1:
+    while len(world) <= gs[1] - 1:
         # print(f"{same_field} {act_field}")
-        res = Scene.rng[n].integers(1, 50) + wei #comment appeler "res" pour plus explicite ? 
+        res = rng.rng[n].integers(1, 50) + wei #comment appeler "res" pour plus explicite ?
         act_field = #res du random ?? ou pas bsn de def ici car fait ligne 63
         if res > 50:
             same_field += 1
-            wei += diffwei[same_field] # same_field "+1" ? 
+            wei += diffwei[same_field] # same_field "+1" ?
         if res <= 50:
             for field in range(same_field): world.append(act_field)
             same_field = 1
-            act_field = Scene.rng[n].choice(possibilities[act_field]) 
-        
+            act_field = rng.rng[n].choice(possibilities[act_field])
+
             n += 2
             wei = 50
     world.append("SAFE")
     return world
-                
- 
+
+
 
 def generate_world(world: list[str], grid: Grid) -> list[tuple[str, bool]]: # tuple du type et true/false pour les entités
     """Associate types to chunks"""
     for i, type in enumerate(world):
         chunk = grid.grid[i]
         chunk.type = type
-    
-    
 
 
-def entity_distribution(chunk_type, generate_entity()) -> #?? :
+def entity_distribution(chunk_type, generate_entity()) -> :#?? :
     if chunk_type.value is True
-        for 
-    
+        pass
+
+
+def get_world(rng, grid, entities):
+    pass
 
 #if __name__ == "__main__":
-     
