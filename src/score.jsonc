@@ -1,8 +1,8 @@
 {
   "5": {
-    "score": 280,
-    "name": "TIMO",
-    "seed": 69395
+    "score": 290,
+    "name": "top5?",
+    "seed": 75377
   },
   "4": {
     "score": 320,
@@ -10,9 +10,9 @@
     "seed": 41639
   },
   "3": {
-    "score": 350,
-    "name": "top_3",
-    "seed": 33593
+    "score": 330,
+    "name": "top3?",
+    "seed": 23829
   },
   "2": {
     "score": 350,
@@ -21,7 +21,7 @@
   },
   "1": {
     "score": 360,
-    "name": "Timo",
-    "seed": 28346
+    "name": "PLAYER",
+    "seed": 47416
   }
 }

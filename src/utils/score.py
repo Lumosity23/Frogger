@@ -60,8 +60,9 @@ class score:
                 if str(k).isdigit() and isinstance(v, dict)
             }
             self.leaderboard = sorted(
-                [val["score"] for val in self.load_scores.values()]
+                [val["score"] for val in self.load_scores.values()], reverse=True
             )
+            log.debug(self.leaderboard)
         except Exception as e:
             log.error(f"Échec du chargement des scores depuis {self.path_file} : {e}")
             self.load_scores = {}
@@ -106,9 +107,10 @@ class score:
         if self.is_high_score:
             return 1
 
-        for i, score in enumerate(sorted(self.leaderboard, reverse=True)):
+        for i, score in enumerate(self.leaderboard):
+            print(i, score)
             if self.score > score:
-                return MAX_SAVE - i
+                return i + 1
 
     def _write_score(self) -> None:
         """Écrit les scores de manière atomique."""
