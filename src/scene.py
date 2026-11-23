@@ -7,6 +7,7 @@ import pygame as pg
 # import src.map.generate_world as gw
 from src.entities.chicken import Chicken
 from src.entities.haybale import HayBale
+from src.entities.chicken_coop import Chicken_coop
 from src.entities.pig import Pig
 from src.map.chunk import Chunk
 from src.map.grid import Grid
@@ -54,7 +55,7 @@ class Scene:
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
             "SAFE": self.chill,
-            "PIG": self.on_mud,
+            "PIG": self.on_mud, # changer en "MUD"
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
@@ -97,9 +98,15 @@ class Scene:
                 self.grid.grid[i].type = "PIG"
             self.grid.grid[0].type = "END"
 
+
         else:
             pass
 
+        self.grid.grid[0].type += 
+        for e in range(5): # 5 poulaillers
+            entity = Chicken_coop
+            Chicken_coop.col = int(screen[0]/6) + int(screen[0]/6)*e
+        
     @property
     def tile_size(self) -> tuple[int, int]:
         return self.tile, self.tile
@@ -109,6 +116,7 @@ class Scene:
         self.time = 12.0
         self.seed = get_seed()
         self.rng = np.random.default_rng(self.seed)
+        self.grid.generate_world(self.rng)
         self.score = score("src/score.jsonc")
         self.chicken.is_alive = True
         self.respawn_chicken(True)

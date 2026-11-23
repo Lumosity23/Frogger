@@ -8,7 +8,7 @@ ASSETS = os.path.join(ROOT, "assets")
 PATH = os.path.join(ASSETS, "chicken_coop.png")
 
 
-class chicken_coop(Entity):
+class Chicken_coop(Entity):
     def __init__(self, col, row, scale):
         super().__init__(col, row, scale)
         self.duration = 0.7
