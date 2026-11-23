@@ -4,6 +4,7 @@ from math import ceil, floor
 from pygame.rect import Rect
 
 from src.entities.entity import Entity
+from src.map import generate_world as gw
 from src.map.chunk import Chunk
 from src.utils import log
 from src.utils.projection import Projection
@@ -17,6 +18,7 @@ class Grid:
         self.tile: float = tile
         self.cell_size: int = int(tile * scale)
         self.grid: dict[int, Chunk] = self.make_grid()
+        self.entities = gw.generate_entity()
 
     def make_grid(self) -> dict[int, Chunk]:
         grid: dict[int, Chunk] = {}
@@ -65,3 +67,14 @@ class Grid:
     def update(self, dt: float):
         for chunk in self.grid.values():
             chunk.update(dt)
+
+    def generate_world(self, rng):
+        self.reset_world()
+        self.grid = gw.get_world(rng, self.grid, self.entities)
+
+    def reset_world(self):
+        for c in self.grid.values():
+            c.velocity = 1
+            c.entities.clear()
+            c.type = "SAFE"
+            c.padding = 1
