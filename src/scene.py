@@ -6,8 +6,8 @@ import pygame as pg
 
 # import src.map.generate_world as gw
 from src.entities.chicken import Chicken
-from src.entities.haybale import HayBale
 from src.entities.chicken_coop import Chicken_coop
+from src.entities.haybale import HayBale
 from src.entities.pig import Pig
 from src.map.chunk import Chunk
 from src.map.grid import Grid
@@ -31,7 +31,7 @@ MOVES: dict[int, tuple[int, int]] = {
     pg.K_s: (0, 1),
 }
 
-OG_MAP = True
+OG_MAP = False
 
 # appeler get_seed
 
@@ -55,7 +55,7 @@ class Scene:
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
             "SAFE": self.chill,
-            "PIG": self.on_mud, # changer en "MUD"
+            "PIG": self.on_mud,  # changer en "MUD"
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
@@ -73,19 +73,19 @@ class Scene:
 
         # Prepare the world
         self.grid: Grid = Grid(self.grid_size, self.tile, scale)
-        col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
+        # col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(self.grid_size[0] / 2), 1, scale)
-        self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
-        self.pig: Pig = Pig(round(col - 10), round(row), scale)
+        # self.grid.grid[0] += self.chicken
+        # self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
+        # self.pig: Pig = Pig(round(col - 10), round(row), scale)
 
         # Subscribtion
         self.state_mgr.subscribe(self.on_state_change)
 
         # Test
-        self.grid.grid[18] += self.haybale
-        self.grid.grid[1] += self.chicken
-        self.respawn_chicken(True)
-        self.grid.grid[13] += self.pig
+        # self.grid.grid[18] += self.haybale
+        self.spawn_chicken()
+        # elf.grid.grid[13] += self.pig
 
         # OG MAP
         if OG_MAP:
@@ -98,14 +98,12 @@ class Scene:
                 self.grid.grid[i].type = "PIG"
             self.grid.grid[0].type = "END"
 
-
-        else:
-            pass
-
+            """
         self.grid.grid[0].type +=
         for e in range(5): # 5 poulaillers
             entity = Chicken_coop
             Chicken_coop.col = int(screen[0]/6) + int(screen[0]/6)*e
+            """
 
     @property
     def tile_size(self) -> tuple[int, int]:
@@ -116,7 +114,9 @@ class Scene:
         self.time = 12.0
         self.seed = get_seed()
         self.rng = np.random.default_rng(self.seed)
-        self.grid.generate_world(self.rng)
+        if not OG_MAP:
+            self.grid.generate_world(self.rng)
+            self.spawn_chicken()
         self.score = score("src/score.jsonc")
         self.chicken.is_alive = True
         self.respawn_chicken(True)
@@ -243,6 +243,9 @@ class Scene:
         self.chicken.row = len(self.grid.grid) - 1
         self.chicken.col = len(self.grid.grid[0].tiles) // 2
         self.update_chicken_chunk()
+
+    def spawn_chicken(self):
+        self.grid.grid[len(self.grid.grid) - 1] += self.chicken
 
     def snap_chicken(self, e: Entity | float, not_pos: bool = True):
         if not_pos:

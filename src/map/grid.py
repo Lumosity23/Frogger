@@ -1,12 +1,15 @@
 from math import ceil, floor
+from typing import TYPE_CHECKING
 
-# from numpy import random
+if TYPE_CHECKING:
+    import numpy as np
 from pygame.rect import Rect
 
 from src.entities.entity import Entity
 from src.map import generate_world as gw
 from src.map.chunk import Chunk
-from src.utils import log
+
+# from src.utils import log
 from src.utils.projection import Projection
 
 
@@ -18,7 +21,7 @@ class Grid:
         self.tile: float = tile
         self.cell_size: int = int(tile * scale)
         self.grid: dict[int, Chunk] = self.make_grid()
-        self.entities = gw.generate_entity()
+        self.entities: dict[str, list[Entity]] = gw.generate_entity(scale)
 
     def make_grid(self) -> dict[int, Chunk]:
         grid: dict[int, Chunk] = {}
@@ -68,9 +71,13 @@ class Grid:
         for chunk in self.grid.values():
             chunk.update(dt)
 
-    def generate_world(self, rng):
+    def generate_world(self, rng: np.random.Generator):
         self.reset_world()
-        self.grid = gw.get_world(rng, self.grid, self.entities)
+        entities = {
+            "MUD": self.entities["MUD"].copy(),
+            "ROAD": self.entities["ROAD"].copy(),
+        }
+        self.grid = gw.get_world(rng, self.grid, entities)
 
     def reset_world(self):
         for c in self.grid.values():
