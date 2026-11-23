@@ -1,1 +1,27 @@
-{}
+{
+  "5": {
+    "score": 290,
+    "name": "top5?",
+    "seed": 75377
+  },
+  "4": {
+    "score": 320,
+    "name": "JU",
+    "seed": 41639
+  },
+  "3": {
+    "score": 330,
+    "name": "top3?",
+    "seed": 23829
+  },
+  "2": {
+    "score": 350,
+    "name": "Barbara",
+    "seed": 88592
+  },
+  "1": {
+    "score": 360,
+    "name": "PLAYER",
+    "seed": 47416
+  }
+}

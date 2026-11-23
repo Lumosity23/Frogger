@@ -6,6 +6,7 @@ from src.entities.group import EntityGroup
 ROOT = os.path.dirname(os.path.abspath(__name__))
 ASSETS = os.path.join(ROOT, "assets")
 PATH = os.path.join(ASSETS, "pig_anim.png")
+REVERSE_PATH = os.path.join(ASSETS, "reverse_pig.png")
 
 
 class Pig(EntityGroup):
@@ -14,7 +15,12 @@ class Pig(EntityGroup):
         self.duration = 0.7
         self.is_alive = True
         self.lsize = (3, 1)
-        self.imgs = self.get_anim(6, PATH, scale)
+        self.animations = {
+            1: self.get_anim(6, PATH, scale),
+            -1: self.get_anim(6, REVERSE_PATH, scale),
+        }
+        self.imgs = self.animations[1].copy()
+        self.img = self.imgs[0]
         self.lift_val = -15.0 * scale
 
     @property

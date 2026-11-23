@@ -1,16 +1,19 @@
 import pygame as pg
 import pygame_gui as ui
 
+from src.state import GameState, StateManager
 from src.ui import make_button as mb
 from src.ui.windows.base import Window
+from src.utils import log
 
 FONT_PATH = "assets/font/PublicPixel.ttf"
 
 
 class PixelUI:
-    def __init__(self, screen: pg.Surface, state: str):
+    def __init__(self, screen: pg.Surface, state_mgr: StateManager):
         self.manager: ui.UIManager = ui.UIManager(screen.get_size())
-        self.state: str = state
+        self.state_mgr: StateManager = state_mgr
+        self.state_mgr.subscribe(self.on_state_change)
 
         # UIElements
         self.buttons: dict[str, ui.elements.UIButton] = {}
@@ -181,17 +184,38 @@ class PixelUI:
         if self.current is not None:
             self.current.hide()
         self.current = self.windows[name]
+        # log.debug(self.current.__class__.__name__)
         self.current.show()
 
-    def handle_event(self, event: pg.Event) -> None:
-        self.manager.process_events(event)
+    def on_state_change(self, new_state: GameState, old_state: GameState) -> None:
+        # Ouvre la bonne fenêtre selon le nouvel état
+        mapping = {
+            GameState.MENU: "MENU",
+            GameState.PLAY: "HUD",
+            GameState.PAUSE: "PAUSE",
+            GameState.GAME_OVER: "GAME_OVER",
+            GameState.LEADERBOARD: "LEADERBOARD",
+        }
+        window_name = mapping.get(new_state)
+        if window_name and window_name in self.windows:
+            self.open(window_name)
+
+    def handle_event(self, event: pg.Event) -> bool:
+        consumed = bool(self.manager.process_events(event))
         if self.current is None:
-            return
+            return consumed
         next_name = self.current.handle_event(event)
         if next_name is not None:
-            self.open(next_name)
+            if next_name == "QUIT":
+                pg.event.post(pg.event.Event(pg.QUIT))
+            elif next_name in self.windows:
+                self.open(next_name)
+            return True
+        return consumed
 
     def update(self, dt: float) -> None:
+        if self.current is not None:
+            self.current.update(dt)
         self.manager.update(dt)
 
     def draw(self, screen: pg.Surface) -> None:
