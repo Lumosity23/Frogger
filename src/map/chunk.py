@@ -12,6 +12,7 @@ class Chunk:
     velocity: float = 1.0
     direction: int = -1
     type: str = "SAFE"
+    padding: int = 1
 
     @property
     def logic_size(self) -> int:
