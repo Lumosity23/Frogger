@@ -21,6 +21,12 @@ class Chunk:
         self.entities: list[Entity] = []
         self.tiles: list[tuple[int, int]] = [(c, self.row) for c in range(self.col)]
 
+    def init(self):
+        last_pos = 0
+        for e in self.entities:
+            e.col = last_pos + self.padding
+            last_pos = e.col + e.lsize[0]
+
     def update(self, dt: float):
         step: float = dt * self.velocity * self.direction
 

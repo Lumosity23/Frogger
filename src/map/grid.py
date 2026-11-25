@@ -78,6 +78,8 @@ class Grid:
             "ROAD": self.entities["ROAD"].copy(),
         }
         self.grid = gw.get_world(rng, self.grid, entities)
+        for c in self.grid.values():
+            c.init()
 
     def reset_world(self):
         for c in self.grid.values():

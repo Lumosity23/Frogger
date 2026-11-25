@@ -20,7 +20,7 @@ ENTITY_SET: dict[type[Entity], tuple[int, str]] = {
     Pig: (150, "MUD"),
     HayBale: (150, "ROAD"),
 }
-MAX_ENTITIES: int = 10
+MAX_ENTITIES: int = 4
 
 
 def generate_entity(scale: float) -> dict[str, list[Entity]]:
@@ -30,7 +30,7 @@ def generate_entity(scale: float) -> dict[str, list[Entity]]:
     for etype, (n, ctype) in ENTITY_SET.items():
         list_entities: list[Entity] = []
         for _ in range(n):
-            lsize = rng.integers(1, 2, 1)[0]
+            lsize = rng.integers(3, 5, 1)[0]
             e = etype(0, 0, scale)
             e.lsize = (lsize, 1)
             list_entities.append(e)
@@ -40,7 +40,7 @@ def generate_entity(scale: float) -> dict[str, list[Entity]]:
 
 def get_chunk_type(rng: np.random.Generator, gs: tuple[int, int]) -> list[str]:
     """Génère les types de chunks (reproductible via le rng) et renvoie une liste
-    de exactement `gs[0]` éléments, qui commence et finit par "SAFE".
+    de exactement `gs[0]` éléments, qui commence par "END" et finit par "SAFE".
 
     Le monde est construit par "bandes" : on choisit un nouveau type différent du
     précédent, puis on décide au hasard de la longueur de la bande.
@@ -96,7 +96,17 @@ def set_velocity(rng: np.random.Generator, grid: dict[int, Chunk]) -> dict[int, 
     for i in range(1, len(grid) - 1):
         c = grid[i]
         if CHUNK_TYPE[c.type]:
-            c.velocity = rng.integers(1, 3, 1)[0]
+            c.velocity = rng.integers(1, 4, 1)[0]
+
+    return grid
+
+
+def set_directions(
+    rng: np.random.Generator, grid: dict[int, Chunk]
+) -> dict[int, Chunk]:
+    for i in range(1, len(grid) - 1):
+        c = grid[i]
+        c.direction = int(rng.choice([-1, 1]))
 
     return grid
 
@@ -124,5 +134,6 @@ def get_world(
     grid = set_type(chunk_type, grid)
     grid = set_padding(rng, grid)
     grid = set_velocity(rng, grid)
+    grid = set_directions(rng, grid)
     grid = entity_distribution(rng, grid, entities)
     return grid

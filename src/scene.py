@@ -49,13 +49,13 @@ class Scene:
         self.score: score = score("src/score.jsonc")
         self.max_lives: int = 5
         self.lives: int = self.max_lives
-        self.timer: float = 20.0
+        self.timer: float = 120.0
         self.time: float = self.timer
         self.input: list[tuple[int, int]] = []
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
             "SAFE": self.chill,
-            "PIG": self.on_mud,  # changer en "MUD"
+            "MUD": self.on_mud,  # changer en "MUD" --> doooone
             "ROAD": self.on_road,
         }
         self.last_chunk_type: str = "SAFE"
@@ -73,11 +73,12 @@ class Scene:
 
         # Prepare the world
         self.grid: Grid = Grid(self.grid_size, self.tile, scale)
+        self.grid.generate_world(self.rng)
         # col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(self.grid_size[0] / 2), 1, scale)
         # self.grid.grid[0] += self.chicken
         # self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
-        # self.pig: Pig = Pig(round(col - 10), round(row), scale)
+        # self.pig: Pig = Pig(round(col - 10), round(row), scale)  ATTENTION maintenant PIG == MUD
 
         # Subscribtion
         self.state_mgr.subscribe(self.on_state_change)
@@ -95,7 +96,7 @@ class Scene:
                 self.grid.grid[i].type = "ROAD"
             self.grid.grid[row // 2].type = "SAFE"
             for i in range(row // 2 - 1, 0, -1):
-                self.grid.grid[i].type = "PIG"
+                self.grid.grid[i].type = "MUD"
             self.grid.grid[0].type = "END"
 
             """
@@ -111,7 +112,7 @@ class Scene:
 
     def reset_game(self) -> None:
         self.lives = self.max_lives
-        self.time = 12.0
+        self.time = self.timer
         self.seed = get_seed()
         self.rng = np.random.default_rng(self.seed)
         if not OG_MAP:
@@ -122,9 +123,10 @@ class Scene:
         self.respawn_chicken(True)
 
     def on_state_change(self, new_state: GameState, old_state: GameState) -> None:
-        if new_state == GameState.PLAY and old_state in (
-            GameState.MENU,
-            GameState.GAME_OVER,
+        if new_state == GameState.MENU and (
+            old_state == GameState.GAME_OVER
+            or old_state == GameState.PAUSE
+            or old_state == GameState.LEADERBOARD
         ):
             self.reset_game()
         elif new_state == GameState.GAME_OVER:
@@ -228,7 +230,7 @@ class Scene:
             if self.chicken.move(*move):
                 self.score.update("FOWARD", -move[1])
             else:
-                self.input.insert(0, move)  # buffer for smoother input
+                pass  # self.input.insert(0, move)  # buffer for smoother input
             self.update_chicken_chunk()
         chunk = self.get_chicken_chunk()
         if chunk:
@@ -274,19 +276,21 @@ class Scene:
             self.respawn_chicken()
 
     def chill(self, chunk: Chunk):
-        if self.last_chunk_type == "PIG":
+        if self.last_chunk_type == "MUD":
             self.chicken.is_movable = False
             self.snap_chicken(self.nearest_tile(chunk), False)
 
     def on_mud(self, chunk: Chunk):
         is_collide, e = self.chicken_is_collide(chunk, True)
-        if chunk.type == "PIG" and is_collide:
+        if chunk.type == "MUD" and is_collide:
             self.chicken.is_movable = True
             self.snap_chicken(e)
         else:
             self.respawn_chicken()
 
     def on_road(self, chunk: Chunk):
+        if self.last_chunk_type == "MUD":
+            self.chicken.is_movable = False
         is_collide, e = self.chicken_is_collide(chunk)
         if is_collide:
             self.respawn_chicken()
