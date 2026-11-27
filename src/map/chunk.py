@@ -22,6 +22,12 @@ class Chunk:
         self.entities: list[Entity] = []
         self.tiles: list[tuple[int, int]] = [(c, self.row) for c in range(self.col)]
 
+    def init(self):
+        last_pos = 0
+        for e in self.entities:
+            e.col = last_pos + self.padding
+            last_pos = e.col + e.lsize[0]
+
     def update(self, dt: float):
         step: float = dt * self.velocity * self.direction
 
@@ -72,7 +78,7 @@ class Chunk:
     def __iadd__(self, entity: Entity) -> Chunk:  # chunk += entity
         entity.row = self.row
         # entity.direction = self.direction
-        if hasattr(entity, "imgs"):
+        if hasattr(entity, "imgs") and hasattr(entity, "animation"):
             entity.imgs = entity.animations[self.direction].copy()
         entity.last_pos = entity.col, self.row
         self.entities.append(entity)

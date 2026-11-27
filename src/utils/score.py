@@ -14,7 +14,6 @@ from src.utils import log
 
 MAX_SAVE = 5
 TABLE: dict[str, int] = {
-    "FOWARD": 10,
     "FORWARD": 10,
     "CHICKEN_SAVE": 50,
     "ALL_SAVE": 1000,

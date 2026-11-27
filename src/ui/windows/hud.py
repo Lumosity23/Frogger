@@ -3,11 +3,6 @@ from pygame.math import Vector2
 
 from src.ui.windows.base import Window
 
-# ==============================================================================
-# PARAMÈTRES ET TAILLES PAR DÉFAUT DU HUD
-# Vous pouvez modifier les valeurs ici pour ajuster la taille de vos éléments,
-# ou passer ces arguments lors de l'instanciation de HudWindow (ex dans main.py).
-# ==============================================================================
 DEFAULT_SCALE: float = 1.0  # Échelle globale du HUD
 DEFAULT_SCORE_SCALE: float = 3.0  # Échelle spécifique des chiffres du score
 DEFAULT_TIME_SCALE: float = 2.0  # Échelle spécifique des chiffres du temps

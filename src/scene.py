@@ -33,8 +33,6 @@ MOVES: dict[int, tuple[int, int]] = {
 
 OG_MAP = False
 
-# appeler get_seed
-
 
 class Scene:
     def __init__(
@@ -44,22 +42,25 @@ class Scene:
         self.state_mgr: StateManager = state_mgr
         self.dead_state: str = "GAME OVER"
         self.tile: int = int(50 * scale)
-        self.grid_size: tuple[int, int] = (15, 30)
+        self.grid_size: tuple[int, int] = (15, 5)
+        self.col, self.row = self.grid_size
         self.mode: str = "PROD"
         self.score: score = score("src/score.jsonc")
         self.max_lives: int = 5
         self.lives: int = self.max_lives
-        self.timer: float = 20.0
+        self.timer: float = 120.0
         self.time: float = self.timer
         self.input: list[tuple[int, int]] = []
+
         self.chicken_actions: dict[str, Callable[[], None]] = {
             "END": self.back_chicken_coop,
             "SAFE": self.chill,
-            "PIG": self.on_mud,  # changer en "MUD"
+            "MUD": self.on_mud,  # changer en "MUD" --> doooone
             "ROAD": self.on_road,
         }
+
         self.last_chunk_type: str = "SAFE"
-        self.seed: int = get_seed()
+        self.seed: int = self.get_seed()
         self.rng = np.random.default_rng(
             self.seed
         )  # Est-ce correct ? OUI OMG ça fonctionne #émue -> pas bon endroit pour rng ??
@@ -73,11 +74,12 @@ class Scene:
 
         # Prepare the world
         self.grid: Grid = Grid(self.grid_size, self.tile, scale)
+        self.grid.generate_world(self.rng)
         # col, row = self.proj.unproject(screen_size[0] / 2, screen_size[1] / 2)
         self.chicken: Chicken = Chicken(round(self.grid_size[0] / 2), 1, scale)
         # self.grid.grid[0] += self.chicken
         # self.haybale: HayBale = HayBale(round(col - 10), round(row), scale)
-        # self.pig: Pig = Pig(round(col - 10), round(row), scale)
+        # self.pig: Pig = Pig(round(col - 10), round(row), scale)  ATTENTION maintenant PIG == MUD
 
         # Subscribtion
         self.state_mgr.subscribe(self.on_state_change)
@@ -95,15 +97,17 @@ class Scene:
                 self.grid.grid[i].type = "ROAD"
             self.grid.grid[row // 2].type = "SAFE"
             for i in range(row // 2 - 1, 0, -1):
-                self.grid.grid[i].type = "PIG"
+                self.grid.grid[i].type = "MUD"
             self.grid.grid[0].type = "END"
 
-            """
-        self.grid.grid[0].type +=
+        sixieme = int(self.col/6)
+
+        self.grid.grid[0].type = "END"
         for e in range(5): # 5 poulaillers
-            entity = Chicken_coop
-            Chicken_coop.col = int(screen[0]/6) + int(screen[0]/6)*e
-            """
+            entity = Chicken_coop(0,0,scale)
+            entity.col = sixieme + (sixieme * e)
+            self.grid.grid[0] +=  entity
+
 
     @property
     def tile_size(self) -> tuple[int, int]:
@@ -111,8 +115,8 @@ class Scene:
 
     def reset_game(self) -> None:
         self.lives = self.max_lives
-        self.time = 12.0
-        self.seed = get_seed()
+        self.time = self.timer
+        self.seed = self.get_seed()
         self.rng = np.random.default_rng(self.seed)
         if not OG_MAP:
             self.grid.generate_world(self.rng)
@@ -122,15 +126,19 @@ class Scene:
         self.respawn_chicken(True)
 
     def on_state_change(self, new_state: GameState, old_state: GameState) -> None:
-        if new_state == GameState.PLAY and old_state in (
-            GameState.MENU,
-            GameState.GAME_OVER,
+        if new_state == GameState.MENU and (
+            old_state == GameState.GAME_OVER
+            or old_state == GameState.PAUSE
+            or old_state == GameState.LEADERBOARD
         ):
             self.reset_game()
         elif new_state == GameState.GAME_OVER:
             self.respawn_chicken()
             self.lives = int(self.max_lives)
             self.time = float(self.timer)
+
+        elif new_state == GameState.PLAY and old_state == GameState.GAME_OVER:
+            self.reset_game()
 
     def prep_world(self):
         # gw.generate_world()
@@ -228,7 +236,7 @@ class Scene:
             if self.chicken.move(*move):
                 self.score.update("FOWARD", -move[1])
             else:
-                self.input.insert(0, move)  # buffer for smoother input
+                pass  # self.input.insert(0, move)  # buffer for smoother input
             self.update_chicken_chunk()
         chunk = self.get_chicken_chunk()
         if chunk:
@@ -267,26 +275,30 @@ class Scene:
 
     def back_chicken_coop(self, chunk: Chunk):
         is_collide, e = self.chicken_is_collide(chunk, True)
-        if chunk.type == "END" and is_collide:
+        if chunk.type == "END" and is_collide and not e.is_occupied:
             self.score.update("CHICKEN_SAVE")
             self.respawn_chicken(True)
+            e.is_occupied = True
         else:
             self.respawn_chicken()
 
     def chill(self, chunk: Chunk):
-        if self.last_chunk_type == "PIG":
+        if self.last_chunk_type == "MUD":
             self.chicken.is_movable = False
             self.snap_chicken(self.nearest_tile(chunk), False)
 
     def on_mud(self, chunk: Chunk):
         is_collide, e = self.chicken_is_collide(chunk, True)
-        if chunk.type == "PIG" and is_collide:
+        if chunk.type == "MUD" and is_collide:
             self.chicken.is_movable = True
             self.snap_chicken(e)
         else:
             self.respawn_chicken()
 
     def on_road(self, chunk: Chunk):
+        if self.last_chunk_type == "MUD":
+            self.chicken.is_movable = False
+            self.snap_chicken(self.nearest_tile(chunk), False)
         is_collide, e = self.chicken_is_collide(chunk)
         if is_collide:
             self.respawn_chicken()
@@ -304,9 +316,11 @@ class Scene:
         return all_occupied == (size - 1)
 
 
-def get_seed() -> int:
-    seed: str = ""
-    numbers = np.random.default_rng().integers(1, 10, 5)
-    for n in numbers:
-        seed += str(n)
-    return int(seed)
+    def get_seed(self) -> int:
+        seed: str = ""
+        numbers = np.random.default_rng().integers(1, 10, 5)
+        for n in numbers:
+            seed += str(n)
+        return int(seed)
+
+
