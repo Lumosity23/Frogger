@@ -85,7 +85,6 @@ class Grid:
     def reset_world(self):
         for c in self.grid.values():
             if c.type == "END":
-                log.debug(c.entities)
                 continue
             c.velocity = 1
             c.entities.clear()

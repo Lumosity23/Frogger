@@ -81,7 +81,6 @@ def set_type(world: list[str], grid: dict[int, Chunk]):
     for i, type in enumerate(world):
         chunk = grid[i]
         chunk.type = type
-        log.debug(type)
     return grid
 
 

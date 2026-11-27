@@ -152,6 +152,13 @@ class Scene:
         if self.is_game_over():
             self.state_mgr.set(GameState.GAME_OVER)
             return
+        if self.is_win():
+            self.score.update("ALL_SAVE")
+            self.score.update("TIME_LEFT", int(self.time))
+            self.state_mgr.set(GameState.GAME_OVER)
+            for e in self.grid.grid[0]:
+                e.is_occupied = False
+
         if self.state_mgr.current == GameState.PLAY:
             self.time -= dt
             if self.chicken.is_alive:
@@ -308,10 +315,8 @@ class Scene:
         all_occupied = 0
         end_chunk = self.grid.grid[0]
         size = len(end_chunk)
-        if size <= 1:
-            return False
         for e in end_chunk:
-            if hasattr(e, "occupied"):
+            if e.is_occupied:
                 all_occupied += 1
         return all_occupied == size
 
