@@ -43,7 +43,7 @@ class Scene:
         self.state_mgr: StateManager = state_mgr
         self.dead_state: str = "GAME OVER"
         self.tile: int = int(50 * scale)
-        self.grid_size: tuple[int, int] = (15, 5)
+        self.grid_size: tuple[int, int] = (15, 10)
         self.col, self.row = self.grid_size
         self.mode: str = "PROD"
         self.score: score = score("src/score.jsonc")
@@ -121,7 +121,7 @@ class Scene:
         if not OG_MAP:
             self.grid.generate_world(self.rng)
             self.spawn_chicken()
-        self.score = score("src/score.jsonc")
+        self.score._next_game()
         self.chicken.is_alive = True
         self.respawn_chicken(True)
 

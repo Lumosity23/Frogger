@@ -8,8 +8,7 @@ from pygame.rect import Rect
 from src.entities.entity import Entity
 from src.map import generate_world as gw
 from src.map.chunk import Chunk
-
-# from src.utils import log
+from src.utils import log
 from src.utils.projection import Projection
 
 
@@ -79,11 +78,14 @@ class Grid:
         }
         self.grid = gw.get_world(rng, self.grid, entities)
         for c in self.grid.values():
+            if c.type == "END":
+                continue
             c.init()
 
     def reset_world(self):
         for c in self.grid.values():
-            if c.type  == "END":
+            if c.type == "END":
+                log.debug(c.entities)
                 continue
             c.velocity = 1
             c.entities.clear()

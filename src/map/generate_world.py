@@ -58,7 +58,7 @@ def get_chunk_type(rng: np.random.Generator, gs: tuple[int, int]) -> list[str]:
         "SAFE": ["ROAD", "MUD"],
     }
 
-    world: list[str] = ["SAFE"]
+    world: list[str] = ["END"]
     current = "SAFE"
 
     while len(world) < n_rows - 1:
@@ -81,6 +81,7 @@ def set_type(world: list[str], grid: dict[int, Chunk]):
     for i, type in enumerate(world):
         chunk = grid[i]
         chunk.type = type
+        log.debug(type)
     return grid
 
 
