@@ -101,12 +101,12 @@ class Scene:
                 self.grid.grid[i].type = "MUD"
             self.grid.grid[0].type = "END"
 
-        sixieme = math.ceil(self.col / 6)
+        sixieme = int(self.col / 5)
 
         self.grid.grid[0].type = "END"
         for e in range(5):  # 5 poulaillers
             entity = Chicken_coop(0, 0, scale)
-            entity.col = sixieme + (sixieme * e)
+            entity.col = 1 + sixieme * e
             self.grid.grid[0] += entity
 
     @property
