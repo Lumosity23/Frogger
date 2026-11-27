@@ -14,6 +14,7 @@ from src.utils import log
 
 MAX_SAVE = 5
 TABLE: dict[str, int] = {
+    "FOWARD": 10,
     "FORWARD": 10,
     "CHICKEN_SAVE": 50,
     "ALL_SAVE": 1000,
@@ -118,6 +119,7 @@ class score:
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(self.load_scores, f, indent=2)
             os.replace(tmp_path, self.path_file)
+            self._next_game()
         except (OSError, TypeError, ValueError) as e:
             log.error("Échec de l'écriture des scores dans %s : %s", self.path_file, e)
             if "tmp_path" in locals() and os.path.exists(tmp_path):

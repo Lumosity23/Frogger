@@ -1,3 +1,4 @@
+import math
 import re
 from collections.abc import Callable
 
@@ -100,14 +101,13 @@ class Scene:
                 self.grid.grid[i].type = "MUD"
             self.grid.grid[0].type = "END"
 
-        sixieme = int(self.col/6)
+        sixieme = math.ceil(self.col / 6)
 
         self.grid.grid[0].type = "END"
-        for e in range(5): # 5 poulaillers
-            entity = Chicken_coop(0,0,scale)
+        for e in range(5):  # 5 poulaillers
+            entity = Chicken_coop(0, 0, scale)
             entity.col = sixieme + (sixieme * e)
-            self.grid.grid[0] +=  entity
-
+            self.grid.grid[0] += entity
 
     @property
     def tile_size(self) -> tuple[int, int]:
@@ -313,8 +313,7 @@ class Scene:
         for e in end_chunk:
             if hasattr(e, "occupied"):
                 all_occupied += 1
-        return all_occupied == (size - 1)
-
+        return all_occupied == size
 
     def get_seed(self) -> int:
         seed: str = ""
@@ -322,5 +321,3 @@ class Scene:
         for n in numbers:
             seed += str(n)
         return int(seed)
-
-
